@@ -8,6 +8,42 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+.dropdown {
+    float: left;
+    overflow: hidden;
+}
+.dropdown .dropbtn {
+    cursor: pointer;
+    font-size: 16px;    
+    border: none;
+    outline: none;
+    color: white;
+    padding: 7px 8px;
+    background-color: inherit; 
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+.dropdown-content a {
+    float: none;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
 .container {
     margin: 50px auto;
     background-color: #1e1e1e;
@@ -113,19 +149,9 @@ body {
     padding: 10px;
 }
 
-.grid-container{
-    display: grid;
-    padding: 25px;
-    grid-template-columns: 80% 15% 10%;
-    margin: 50px auto;
-    background-color: #1e1e1e;
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
 .grid-container {
     display: grid;
-    padding:25px;
+    padding:15px;
     grid-template-columns: 80% 10% 10%;
     position: fixed;
     top: 0;
@@ -144,6 +170,8 @@ body {
     padding: 50px;
     margin-top: 40px; /* Space for the fixed grid-container */
 }
+
+
 
 .container:hover{
     transform: translateY(-5px);
@@ -229,6 +257,12 @@ button:active {
     margin-top: 15px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+}
+
+#video-feed {
+    width: 75%; /* Make image responsive */
+    height: auto; /* Maintain aspect ratio */
+    display: none; /* Initially hidden until button is clicked */
 }
 
 @media (max-width: 600px) {
