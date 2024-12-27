@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DefectVision AI (Dark Mode)</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="grid-container">
+        <div><a href="/">Home</a></div>
+        <div class="dropdown">
+            <button class="dropbtn">Inference</button>
+            <div class="dropdown-content">
+                <a href="/index">Image</a>
+                <a href="/video">Video</a>
+                <a href="/live">Live</a>
+            </div>
+        </div> 
+        <div><a href="/about">About</a></div>
+    </div>
+    <div class="container">
+        <form id="upload-form">
+            <label for="file-upload">Upload Car Video:</label>
+            <input type="file" id="file-upload" accept="video/*">
+            <label for="model-select">Choose a Detection Model:</label>
+            <select id="model-select">
+                <option value="model1">Model 1: Yolov8 Medium</option>
+                <option value="model2">Model 2: Yolov8 Mini</option>
+                <option value="model3">Model 3: Yolov8 Large</option>
+                <option value="model4">Model 4: Yolov8 Large XL</option>
+            </select>
+            <button type="button" id="video-button">Submit for Analysis</button>
+        </form>
+
+        <div id="results">
+            <h2>Analysis Results</h2>
+            <p id="ai-response"></p>
+            <h3>Processed Image</h3>
+            <video id="generated-video" controls alt="Processed Video" style="max-width: 100%; height: auto;">
+                <source id="video-source" src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <h3>Servicing Helpline</h3>
+            <p id="helpline"></p>
+        </div>
+    </div>
+    <script src="static/script.js"></script>
+</body>
+
+</html>

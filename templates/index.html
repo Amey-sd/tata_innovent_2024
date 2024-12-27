@@ -12,7 +12,14 @@
 <body>
     <div class="grid-container">
         <div><a href="/">Home</a></div>
-        <div><a href="/index">Inference</a></div>
+        <div class="dropdown">
+            <button class="dropbtn">Inference</button>
+            <div class="dropdown-content">
+                <a href="/index">Image</a>
+                <a href="/video">Video</a>
+                <a href="/live">Live</a>
+            </div>
+        </div> 
         <div><a href="/about">About</a></div>
     </div>
     <div class="container">
@@ -25,8 +32,6 @@
                 <option value="model2">Model 2: Yolov8 Mini</option>
                 <option value="model3">Model 3: Yolov8 Large</option>
                 <option value="model4">Model 4: Yolov8 Large XL</option>
-                <option value="model5">Model 5: DetectronV2 Medium</option>
-                <option value="model6">Model 6: DetectronV2 Mini</option>
             </select>
             <button type="button" id="submit-button">Submit for Analysis</button>
         </form>
