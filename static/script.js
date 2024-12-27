@@ -1,4 +1,11 @@
 /* script.js */
+document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => {
+        const inner = card.querySelector('.card-inner');
+        inner.style.transform = inner.style.transform === 'rotateY(180deg)' ? '' : 'rotateY(180deg)';
+    });
+});
+
 document.getElementById('submit-button').addEventListener('click', function() {
     const fileInput = document.getElementById('file-upload');
     const selectedModel = document.getElementById('model-select').value;
