@@ -60,11 +60,21 @@ app = Flask(__name__)
 
 UPLOAD_FOLDER = 'static/uploads'
 PROCESSED_FOLDER = 'static/processed'
+IMG_FOLDER = 'static/images'
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
+os.makedirs(IMG_FOLDER, exist_ok=True)
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 @app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/index')
 def index():
     return render_template('index.html')
 
