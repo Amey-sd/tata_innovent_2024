@@ -27,8 +27,7 @@ document.getElementById('submit-button').addEventListener('click', function () {
             // Show the results section
             document.getElementById('results').style.display = 'block';
 
-            // Set object details
-            document.getElementById('object-ids').textContent = data.object_ids ? data.object_ids.join(', ') : 'N/A';
+            // Set object details]
             document.getElementById('class-ids').textContent = data.class_ids ? data.class_ids.join(', ') : 'N/A';
             document.getElementById('class-names').textContent = data.class_names ? data.class_names.join(', ') : 'N/A';
             document.getElementById('mask-areas').textContent = data.mask_areas ? data.mask_areas.join(', ') : 'N/A';
