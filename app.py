@@ -96,38 +96,39 @@ def process_file():
     processed_filepath = os.path.join(PROCESSED_FOLDER, filename)
     img_pil.save(processed_filepath, format='JPEG')  # Save as JPEG
 
-    results = model.track(img)  # Replace with your image path
+    report = model.track(img, conf=0.2)  # Replace with your image path
 
-    for r in results:
-        # Convert results to list for further analysis
-        object_ids = r.boxes.id.cpu().numpy().tolist()
-        class_ids = r.boxes.cls.cpu().numpy().tolist()
-        class_names = [model.names[int(cls_id)] for cls_id in class_ids]
+    for r in report:
+        if r.boxes is not None:
+            # Convert results to list for further analysis
+            class_ids = r.boxes.cls.cpu().numpy().tolist()
+            class_names = [model.names[int(cls_id)] for cls_id in class_ids]
 
-        # Calculate mask areas
-        masks = r.masks.data  # Access the raw mask data
-        mask_areas = []
+            # Calculate mask areas
+            masks = r.masks.data  # Access the raw mask data
+            mask_areas = []
 
-        if masks is not None:
-            for mask in masks:
-                # Convert each mask to binary format and calculate area
-                binary_mask = mask.cpu().numpy()  # Get the numpy array representation of the mask
-                area = cv2.countNonZero(binary_mask)  # Count non-zero pixels in the mask
-                mask_areas.append(area)
+            if masks is not None:
+                for mask in masks:
+                    # Convert each mask to binary format and calculate area
+                    binary_mask = mask.cpu().numpy()  # Get the numpy array representation of the mask
+                    area = cv2.countNonZero(binary_mask)  # Count non-zero pixels in the mask
+                    mask_areas.append(area)
 
-        print("Object IDs:", object_ids)  # type <class 'list'>
-        print("Class IDs:", class_ids)
-        print("Class Names:", class_names)
-        print("Mask Areas:", mask_areas)  # List of areas for each detected object 
+            #print("Object IDs:", object_ids)  # type <class 'list'>
+            print("Class IDs:", class_ids)
+            print("Class Names:", class_names)
+            print("Mask Areas:", mask_areas)  # List of areas for each detected object 
+        else:
+            print("No boxes detected in this report.")
 
 # Update JSON response
     return jsonify({
-        'object_ids': object_ids,
+        #'object_ids': object_ids,
         'class_ids': class_ids,
         'class_names': class_names,
         'mask_areas': mask_areas,
-        'image_url': f'/static/processed/{filename}',
-        'helpline': 'Contact us at 1-800-CAR-HELP'
+        'image_url': f'/static/processed/{filename}'
     })
 
 def process_video():
