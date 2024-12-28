@@ -192,7 +192,7 @@ def process_video():
     return jsonify({'message': 'Video processed successfully', 'path': output_video_path}), 200
 
 # Try initializing the camera
-camera = cv2.VideoCapture(1)  
+camera = cv2.VideoCapture(0)  
 
 # Check if the camera was opened correctly
 if not camera.isOpened():
