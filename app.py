@@ -7,7 +7,6 @@ import os
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import io
-from flask_socketio import SocketIO
 from PIL import Image
 import subprocess
 
