@@ -169,17 +169,13 @@ def process_video():
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     # Define codec and create output path
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    fourcc = cv2.VideoWriter_fourcc(*'avc1')
     
     output_video_name = f'{filename}'
     output_video_path = os.path.join(PROCESSED_FOLDER, output_video_name)
     os.makedirs(PROCESSED_FOLDER, exist_ok=True)
     out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
-
-    # Process each frame
-    # Before starting to process frames
-    cv2.namedWindow("result", cv2.WINDOW_NORMAL)  # Create a resizable window
-
+    
 # Inside the frame processing loop
     for _ in range(frame_count):
         ret, frame = cap.read()
@@ -190,20 +186,12 @@ def process_video():
         results = model.predict(frame, conf=0.2)
         frame_with_boxes = results[0].plot()  # Annotated frame as numpy array
         frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_RGB2BGR)  # Convert if needed
-    
-        # Display the frame with annotations
-        cv2.imshow("result", frame_with_boxes)
-        cv2.resizeWindow("result", width, height)  # Resize window to match video dimensions
-    
-        # Press 'q' to quit early
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
 
+        out.write(frame_with_boxes)
 
     # Release resources
     cap.release()
     out.release()
-
     # Return success response
     return jsonify({
         'message': 'Video processed successfully',

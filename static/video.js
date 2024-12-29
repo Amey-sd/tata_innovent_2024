@@ -32,14 +32,16 @@ document.getElementById("video-button").addEventListener("click", async function
             console.log("Server Response:", result);
 
             if (result.processed_video_url) {
+                // Alert the user that the video has been processed successfully
+                alert("Video processed successfully!");
 
-                // Provide a link for the user to download the processed video
+                // Show the download link
+                document.getElementById("results").style.display = 'block';
                 aiResponse.innerHTML = `
                     <p>Video processed successfully!</p>
                     <p><a href="${result.processed_video_url}" target="_blank">Click here to download the processed video.</a></p>
                 `;
             } else {
-                // If processed video URL is not present
                 aiResponse.innerText = "Error: Processed video URL not received from the server.";
             }
         } else {
@@ -53,39 +55,3 @@ document.getElementById("video-button").addEventListener("click", async function
         aiResponse.innerText = "An error occurred while processing the video. Please try again.";
     }
 });
-
-document.getElementById("upload-video-button").addEventListener("click", async function () {
-    const videoInput = document.getElementById("video-upload");
-    const videoContainer = document.getElementById("video-container");
-    const videoPlayer = document.getElementById("uploaded-video");
-    const videoSource = document.getElementById("uploaded-video-source");
-
-    const file = videoInput.files[0];
-    if (!file) {
-        alert("Please select a video file to upload.");
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("video", file);
-
-    try {
-        const response = await fetch("/upload-video", {
-            method: "POST",
-            body: formData,
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            videoSource.src = result.video_url; // Set video source URL
-            videoPlayer.load();
-            videoContainer.style.display = "block"; // Show video container
-        } else {
-            alert("Error uploading video. Please try again.");
-        }
-    } catch (error) {
-        console.error("An error occurred:", error);
-        alert("An error occurred while uploading the video.");
-    }
-});
-
