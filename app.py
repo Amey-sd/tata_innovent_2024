@@ -7,6 +7,7 @@ import os
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import io
+from flask_socketio import SocketIO
 from PIL import Image
 import subprocess
 
@@ -218,47 +219,50 @@ def process_video():
 
 
 def generate_frames(model):
-    # Try initializing the camera
-    camera = cv2.VideoCapture(0)  
-
-    # Check if the camera was opened correctly
-    if not camera.isOpened():
-        print("Error: Camera could not be opened.")
-        camera = None  # Set camera to None if unable to open
+    # Try initializing the camera from index 0 to 5
+    camera = None
+    for i in range(6):  # Check camera indices 0 to 5
+        camera = cv2.VideoCapture(i)
+        if camera.isOpened():
+            print(f"Camera found at index {i}")
+            break
+    if camera is None or not camera.isOpened():
+        print("Error: No camera available.")
+        return
 
     while True:
-        if camera is None:
-            break  # If the camera could not be opened, break the loop
         success, frame = camera.read()  # Read the frame from the camera
         if not success:
+            print("Failed to grab frame.")
             break
-        else:
-            # Encode the frame in JPEG format
-            ret, buffer = cv2.imencode('.jpg', frame)
-            if not ret:
-                print("Error: Unable to fetch frame.")
-                break
-            # Run inference on the current frame
-            results = model.predict(frame, stream=False)
 
-            # Access the first result from the list
-            result = results[0]
+        # Run inference on the current frame
+        results = model.predict(frame, stream=False)
 
-            # Plot the predictions on the frame
-            annotated_frame = result.plot()
-            ret, buffer = cv2.imencode('.jpg', annotated_frame)
-            frame = buffer.tobytes()  # Convert to bytes
+        # Access the first result from the list
+        result = results[0]
 
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # Yield the frame
+        # Plot the predictions on the frame
+        annotated_frame = result.plot()
+
+        # Encode the annotated frame in JPEG format
+        ret, buffer = cv2.imencode('.jpg', annotated_frame)
+        if not ret:
+            print("Error: Unable to encode frame.")
+            break
+        frame_bytes = buffer.tobytes()  # Convert frame to bytes
+
+        # Yield the frame as multipart response for MJPEG streaming
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+
+    camera.release()
 
 @app.route('/video_feed')
 def video_feed():
-    # Try initializing the camera
-    camera = cv2.VideoCapture(0) 
-
     model_choice = request.args.get('model')
-    
+
+    # Select the model based on the user's choice
     if model_choice == "model1":
         model = model1
     elif model_choice == "model2":
@@ -270,9 +274,7 @@ def video_feed():
     else:
         return jsonify({'error': 'Invalid model choice'}), 400
 
-    if camera is None:
-        return jsonify({'error': 'Camera not available'}), 400
-
+    # Start video feed and generate frames
     return Response(generate_frames(model),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
