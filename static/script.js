@@ -32,9 +32,6 @@ document.getElementById('submit-button').addEventListener('click', function () {
             document.getElementById('class-names').textContent = data.class_names ? data.class_names.join(', ') : 'N/A';
             document.getElementById('mask-areas').textContent = data.mask_areas ? data.mask_areas.join(', ') : 'N/A';
 
-            // Set helpline information
-            document.getElementById('helpline').textContent = data.helpline || 'No helpline available.';
-
             // Display the processed image
             if (data.image_url) {
                 document.getElementById('generated-image').src = data.image_url;
