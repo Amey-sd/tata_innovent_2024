@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import io
 from PIL import Image
+import mimetypes
 
 file_path = os.path.dirname(__file__)
 model_path1 = os.path.join(file_path, 'models', 'Yolov8', 'Mini', 'weights', 'best.pt')
@@ -131,15 +132,16 @@ def process_file():
         'image_url': f'/static/processed/{filename}'
     })
 
+@app.route('/process-video', methods=['POST'])
 def process_video():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No image file found in the request'}), 400
+    if 'video' not in request.files:
+        return jsonify({'error': 'No video file found in the request'}), 400
     
-    file = request.files['file']
+    file = request.files['video']
     model_choice = request.form.get('model')
     print(f"Model choice received: {model_choice}")
 
-
+    # Select the model
     if model_choice == "model1":
         model = model1
     elif model_choice == "model2":
@@ -151,56 +153,73 @@ def process_video():
     else:
         return jsonify({'error': 'Invalid model choice'}), 400
 
+    # Save the video file
     filename = secure_filename(file.filename)
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(filepath)
 
+    # Open the video file
     cap = cv2.VideoCapture(filepath)
-        
     if not cap.isOpened():
         return jsonify({'error': 'Invalid video file'}), 400
-    
+
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    
-    # Define the codec and create VideoWriter object to save the processed video
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')  # You can change codec as needed
-    
-    # Set a random output path for the processed video
-    output_video_path = os.path.join(PROCESSED_FOLDER, f'{file}new.avi')
-    
-    # Get video properties for saving (width, height, fps)
     fps = cap.get(cv2.CAP_PROP_FPS)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
+    # Define codec and create output path
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    
+    output_video_name = f'{filename}'
+    output_video_path = os.path.join(PROCESSED_FOLDER, output_video_name)
+    os.makedirs(PROCESSED_FOLDER, exist_ok=True)
     out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
 
-    for i in range(frame_count):
+    # Process each frame
+    # Before starting to process frames
+    cv2.namedWindow("result", cv2.WINDOW_NORMAL)  # Create a resizable window
+
+# Inside the frame processing loop
+    for _ in range(frame_count):
         ret, frame = cap.read()
         if not ret:
             break
-        
-        # YOLO Prediction on each frame
-        results = model.predict(frame, conf=0.2)
-        frame_with_boxes = results[0].plot()  # Matplotlib array
-        
-        # Write the processed frame to the output video
-        out.write(frame_with_boxes)
 
+        # Run model prediction
+        results = model.predict(frame, conf=0.2)
+        frame_with_boxes = results[0].plot()  # Annotated frame as numpy array
+        frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_RGB2BGR)  # Convert if needed
+    
+        # Display the frame with annotations
+        cv2.imshow("result", frame_with_boxes)
+        cv2.resizeWindow("result", width, height)  # Resize window to match video dimensions
+    
+        # Press 'q' to quit early
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+
+    # Release resources
     cap.release()
     out.release()
-    
-    return jsonify({'message': 'Video processed successfully', 'path': output_video_path}), 200
 
-# Try initializing the camera
-camera = cv2.VideoCapture(0)  
+    # Return success response
+    return jsonify({
+        'message': 'Video processed successfully',
+        'processed_video_url': f'/static/processed/{output_video_name}'
+    }), 200
 
-# Check if the camera was opened correctly
-if not camera.isOpened():
-    print("Error: Camera could not be opened.")
-    camera = None  # Set camera to None if unable to open
 
 def generate_frames(model):
+    # Try initializing the camera
+    camera = cv2.VideoCapture(0)  
+
+    # Check if the camera was opened correctly
+    if not camera.isOpened():
+        print("Error: Camera could not be opened.")
+        camera = None  # Set camera to None if unable to open
+
     while True:
         if camera is None:
             break  # If the camera could not be opened, break the loop
@@ -229,6 +248,9 @@ def generate_frames(model):
 
 @app.route('/video_feed')
 def video_feed():
+    # Try initializing the camera
+    camera = cv2.VideoCapture(0) 
+
     model_choice = request.args.get('model')
     
     if model_choice == "model1":

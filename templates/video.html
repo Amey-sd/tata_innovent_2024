@@ -19,15 +19,16 @@
                 <a href="/video">Video</a>
                 <a href="/live">Live</a>
             </div>
-        </div> 
+        </div>
         <div><a href="/about">About</a></div>
     </div>
+
     <div class="container">
-        <form id="upload-form">
+        <form id="upload-form" enctype="multipart/form-data">
             <label for="file-upload">Upload Car Video:</label>
-            <input type="file" id="file-upload" accept="video/*">
+            <input type="file" id="file-upload" name="video" accept="video/*" required>
             <label for="model-select">Choose a Detection Model:</label>
-            <select id="model-select">
+            <select id="model-select" name="model" required>
                 <option value="model1">Model 1: Yolov8 Medium</option>
                 <option value="model2">Model 2: Yolov8 Mini</option>
                 <option value="model3">Model 3: Yolov8 Large</option>
@@ -35,20 +36,19 @@
             </select>
             <button type="button" id="video-button">Submit for Analysis</button>
         </form>
-
-        <div id="results">
+        
+        <div id="results" style="display:none;">
             <h2>Analysis Results</h2>
             <p id="ai-response"></p>
-            <h3>Processed Image</h3>
+            <h3>Processed Video</h3>
             <video id="generated-video" controls alt="Processed Video" style="max-width: 100%; height: auto;">
                 <source id="video-source" src="" type="video/mp4">
-                Your browser does not support the video tag.
+                <source id="avi-video-source" src="" type="video/avi">
             </video>
-            <h3>Servicing Helpline</h3>
-            <p id="helpline"></p>
         </div>
     </div>
-    <script src="static/script.js"></script>
+
+    <script src="static/video.js"></script>
 </body>
 
 </html>

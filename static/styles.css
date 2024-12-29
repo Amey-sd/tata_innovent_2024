@@ -4,11 +4,13 @@ body {
     background-color: #121212;
     color: #e0e0e0;
     margin: 0;
-    padding: 0;
+    padding-left: 3%;
+    padding-top: 7.5%;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .dropdown {
+    padding-right: 25px;
     float: left;
     overflow: hidden;
 }
@@ -163,15 +165,9 @@ body {
     z-index: 1000;
 }
 
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #121212;
-    color: #e0e0e0;
-    padding: 50px;
-    margin-top: 40px; /* Space for the fixed grid-container */
+.grid-container div{
+    padding-left: 20px;
 }
-
-
 
 .container:hover{
     transform: translateY(-5px);
@@ -239,16 +235,6 @@ button:active {
 
 #results {
     display: none;
-}
-
-#ai-response, #helpline {
-    font-size: 1.2em;
-    margin-top: 20px;
-    background-color: #1e1e1e;
-    padding: 15px;
-    border-left: 5px solid #6a1b9a;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 #generated-image {
