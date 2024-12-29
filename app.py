@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import io
 from PIL import Image
-import mimetypes
+import subprocess
 
 file_path = os.path.dirname(__file__)
 model_path1 = os.path.join(file_path, 'models', 'Yolov8', 'Mini', 'weights', 'best.pt')
@@ -132,6 +132,17 @@ def process_file():
         'image_url': f'/static/processed/{filename}'
     })
 
+def reencode_video(input_path, output_path):
+    """Re-encode video to H.264 using FFmpeg."""
+    command = [
+        'ffmpeg',
+        '-i', input_path,         # Input file
+        '-vcodec', 'libx264',     # Video codec: H.264
+        '-acodec', 'aac',         # Audio codec: AAC
+        output_path               # Output file
+    ]
+    subprocess.run(command, check=True)
+
 @app.route('/process-video', methods=['POST'])
 def process_video():
     if 'video' not in request.files:
@@ -155,11 +166,11 @@ def process_video():
 
     # Save the video file
     filename = secure_filename(file.filename)
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(filepath)
+    input_path = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(input_path)
 
     # Open the video file
-    cap = cv2.VideoCapture(filepath)
+    cap = cv2.VideoCapture(input_path)
     if not cap.isOpened():
         return jsonify({'error': 'Invalid video file'}), 400
 
@@ -169,14 +180,12 @@ def process_video():
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     # Define codec and create output path
-    fourcc = cv2.VideoWriter_fourcc(*'avc1')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Initial codec for processing
+    processed_video_name = f'processed_{filename}'
+    processed_video_path = os.path.join(PROCESSED_FOLDER, processed_video_name)
+    out = cv2.VideoWriter(processed_video_path, fourcc, fps, (width, height))
     
-    output_video_name = f'{filename}'
-    output_video_path = os.path.join(PROCESSED_FOLDER, output_video_name)
-    os.makedirs(PROCESSED_FOLDER, exist_ok=True)
-    out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
-    
-# Inside the frame processing loop
+    # Process each frame
     for _ in range(frame_count):
         ret, frame = cap.read()
         if not ret:
@@ -192,10 +201,19 @@ def process_video():
     # Release resources
     cap.release()
     out.release()
+
+    # Re-encode the processed video to H.264
+    reencoded_video_name = f'reencoded_{filename}'
+    reencoded_video_path = os.path.join(PROCESSED_FOLDER, reencoded_video_name)
+    try:
+        reencode_video(processed_video_path, reencoded_video_path)
+    except subprocess.CalledProcessError as e:
+        return jsonify({'error': 'Failed to re-encode video', 'details': str(e)}), 500
+
     # Return success response
     return jsonify({
-        'message': 'Video processed successfully',
-        'processed_video_url': f'/static/processed/{output_video_name}'
+        'message': 'Video processed and re-encoded successfully',
+        'processed_video_url': f'/static/processed/{reencoded_video_name}'
     }), 200
 
 
