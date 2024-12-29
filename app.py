@@ -208,6 +208,7 @@ def process_video():
     reencoded_video_path = os.path.join(PROCESSED_FOLDER, reencoded_video_name)
     try:
         reencode_video(processed_video_path, reencoded_video_path)
+        os.remove(processed_video_path)
     except subprocess.CalledProcessError as e:
         return jsonify({'error': 'Failed to re-encode video', 'details': str(e)}), 500
 
