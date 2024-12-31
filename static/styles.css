@@ -9,14 +9,46 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+.grid-container div a {
+    padding: 10px 20px;  /* Adjust the padding for both Home and About buttons */
+    border-radius: 5px;
+    text-decoration: none;
+    color: white;
+    background-color: #7121d3;  /* Button background color */
+    transition: background-color 0.3s ease;
+}
+
+.grid-container div a:hover {
+    background-color: #5a1e9c;  /* Darker color on hover */
+}
+
+.logo-container {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    margin-top: 20px;  /* Adjust this value to lower the logo */
+}
+
+.logo-container div:first-child {
+    color: #601bb4;
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.logo-container div:last-child {
+    color: white;
+    font-size: 18px;
+    font-weight: normal;
+}
+
 .dropdown {
-    padding-right: 25px;
+    padding-right: 0.005px;
     float: left;
     overflow: hidden;
 }
 .dropdown .dropbtn {
     cursor: pointer;
-    font-size: 16px;    
+    font-size: 14.5px;    
     border: none;
     outline: none;
     color: white;
@@ -26,7 +58,7 @@ body {
 .dropdown-content {
     display: none;
     position: absolute;
-    background-color: #f9f9f9;
+    background-color: #7121d3;
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
