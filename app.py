@@ -186,6 +186,7 @@ def process_video():
         results = model.predict(frame, conf=0.2)
         frame_with_boxes = results[0].plot()  # Annotated frame as numpy array
         frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_RGB2BGR)  # Convert if needed
+        frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_BGR2RGB)
 
         out.write(frame_with_boxes)
 
