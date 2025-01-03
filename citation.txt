@@ -1,7 +1,0 @@
-@misc{PaliGemma Examples,
-  author       = {Nitin Tiwari},
-  title        = {PaliGemma Examples},
-  year         = {2024},
-  publisher    = {GitHub},
-  howpublished = {\url{https://github.com/NSTiwari/PaliGemma}},
-}
