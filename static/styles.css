@@ -283,56 +283,95 @@ button:active {
     display: none; /* Initially hidden until button is clicked */
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1200px) {
+    .logo-container {
+        padding-top: 10%;
+        text-align: center;
+        position: relative;
+        z-index: 1; /* Ensure it is layered correctly */
+    }
+    
+    .logo-title {
+        color: #7121d3;
+        font-size: 36px;
+        font-weight: bold;
+    }
+    
+    .logo-subtitle {
+        color: white;
+        font-size: 18px;
+        font-weight: normal;
+    }
+    
     .container {
         padding: 15px;
-        margin: 20px auto;
+        max-width: 100%; /* Ensure the container fits within the viewport */
+        box-sizing: border-box; /* Include padding in the width calculation */
     }
 
     h1 {
         font-size: 2em;
+        text-align: center; /* Center-align the heading for better appearance */
     }
 
     input[type="file"], select, button {
         padding: 10px;
         font-size: 0.9em;
+        width: 100%; /* Full width for better usability */
+        box-sizing: border-box; /* Include padding in width calculation */
     }
+
     .flip-container {
-        width: 90%;
-        height: auto;
+        width: 100%; /* Make it responsive */
+        max-width: 600px; /* Restrict the maximum width */
+        margin: 0 auto; /* Center it horizontally */
     }
 
     .front img {
         height: auto;
+        max-width: 100%; /* Ensure it scales properly */
     }
 
     .back {
         font-size: 1em;
+        text-align: center; /* Align text in the back */
     }
+
     .grid-container {
-        grid-template-columns: 1fr; /* Stack menu items vertically */
+        padding-bottom: 1%;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Flexible column layout */
+        gap: 10px; /* Add space between items */
         text-align: center;
-        margin: 20px auto; 
+        margin-bottom: 10%;
+        max-width: 100%; /* Prevent overflow */
+        box-sizing: border-box;
     }
 
     .image-container, .image-container-bottom {
         grid-template-columns: 1fr; /* Single column layout */
         padding: 20px;
         gap: 20px;
+        max-width: 100%; /* Fit within the screen */
     }
+
     img {
-        max-width: 100%;
+        max-width: 100%; /* Scale images to fit */
         height: auto; /* Maintain aspect ratio */
         border-radius: 10px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); /* Slightly smaller shadow */
     }
+
     p {
         font-size: 1em; /* Standardize paragraph text */
         line-height: 1.4;
         text-align: center; /* Center-align text */
+        margin: 0 auto; /* Center the paragraph */
+        max-width: 100%; /* Prevent overflow */
     }
 
     label, #ai-response, #helpline {
         font-size: 1em; /* Adjust label and response text */
+        display: block; /* Ensure proper stacking on smaller screens */
+        max-width: 100%; /* Fit within the viewport */
     }
 }
