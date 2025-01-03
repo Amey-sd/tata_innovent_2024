@@ -24,16 +24,86 @@
     <div class="container">
         <form id="upload-form">
             <select id="model-select">
-                <option value="model1">Model 1: Yolov8 Medium</option>
-                <option value="model2">Model 2: Yolov8 Mini</option>
+                <option value="model1">Model 1: Yolov8 Mini</option>
+                <option value="model2">Model 2: Yolov8 Medium</option>
                 <option value="model3">Model 3: Yolov8 Large</option>
                 <option value="model4">Model 4: Yolov8 Large XL</option>
             </select>
             <button type="button" id="submit-video-button">Get Live Feed</button>
         </form>
-        <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
-        <button type="button" id="Stop-live">Stop</button>
+        <video id="live-video" autoplay style="width: 640px; height: auto; display: none;"></video>
+        <img id="processed-video-feed" src="" alt="Processed Video Feed" style="display: none;">
+        <button type="button" id="stop-live-button">Stop</button>
     </div>
-    <script src="static/live.js"></script>
+    
+    <script>
+        const liveVideo = document.getElementById('live-video');
+        const processedVideoFeed = document.getElementById('processed-video-feed');
+        const submitVideoButton = document.getElementById('submit-video-button');
+        const stopLiveButton = document.getElementById('stop-live-button');
+        const modelSelect = document.getElementById('model-select');
+        let mediaStream;
+        let intervalId;
+
+        submitVideoButton.addEventListener('click', async () => {
+            const selectedModel = modelSelect.value;
+
+            try {
+                // Start the webcam feed
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                liveVideo.srcObject = mediaStream;
+                liveVideo.style.display = 'block';
+
+                // Show the processed video feed
+                processedVideoFeed.style.display = 'block';
+
+                // Start sending frames to the server
+                intervalId = setInterval(() => {
+                    sendFrame(selectedModel);
+                }, 100); // 10 FPS
+            } catch (error) {
+                console.error("Error accessing webcam: ", error);
+            }
+        });
+
+        stopLiveButton.addEventListener('click', () => {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                liveVideo.srcObject = null;
+                liveVideo.style.display = 'none';
+            }
+            if (intervalId) clearInterval(intervalId);
+            processedVideoFeed.style.display = 'none';
+            processedVideoFeed.src = '';
+        });
+
+        async function sendFrame(model) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+
+            canvas.width = liveVideo.videoWidth;
+            canvas.height = liveVideo.videoHeight;
+            context.drawImage(liveVideo, 0, 0);
+
+            const dataURL = canvas.toDataURL('image/jpeg');
+            try {
+                const response = await fetch('/process_frame', {
+                    method: 'POST',
+                    body: JSON.stringify({ image: dataURL, model: model }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+
+                if (data.image) {
+                    processedVideoFeed.src = data.image; // Set the processed frame
+                } else if (data.error) {
+                    console.error('Server Error:', data.error);
+                }
+            } catch (error) {
+                console.error('Error sending frame:', error);
+            }
+        }
+    </script>
 </body>
 </html>
+
