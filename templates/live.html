@@ -50,7 +50,7 @@
 
             try {
                 // Start the webcam feed
-                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }});
                 liveVideo.srcObject = mediaStream;
                 liveVideo.style.display = 'block';
 
