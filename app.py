@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify, render_template, send_from_directory, Response
 from werkzeug.utils import secure_filename
 from ultralytics import YOLO
 import cv2
@@ -8,65 +8,47 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import io
 from PIL import Image
-import detectron2
-from detectron2.utils.logger import setup_logger
-setup_logger()
-from detectron2 import model_zoo
-from detectron2.engine import DefaultPredictor
-from detectron2.config import get_cfg
-from detectron2.utils.visualizer import Visualizer, ColorMode
-from detectron2.data import MetadataCatalog, DatasetCatalog
-from detectron2.evaluation import COCOEvaluator, inference_on_dataset
-from detectron2.data import build_detection_test_loader
+import mimetypes
 
-model1 = YOLO(r"/home/prakhar/Desktop/Tata Competition/Tata_Innovent_2024/models/Yolov8/Medium/weights/best.pt")
-model2 = YOLO(r"/home/prakhar/Desktop/Tata Competition/Tata_Innovent_2024/models/Yolov8/Mini/weights/best.pt")
-model3 = YOLO(r"/home/prakhar/Desktop/Tata Competition/Tata_Innovent_2024/models/Yolov8/Large/weights/best.pt")
-model4 = YOLO(r"/home/prakhar/Desktop/Tata Competition/Tata_Innovent_2024/models/Yolov8/Large XL/weights/best.pt")
-model5 = YOLO(r"/home/prakhar/Desktop/Tata Competition/Tata_Innovent_2024/models/Yolov8/Large XL/weights/best.pt")
-model6 = YOLO(r"/home/prakhar/Desktop/Tata Competition/Tata_Innovent_2024/models/Yolov8/Large XL/weights/best.pt")
+file_path = os.path.dirname(__file__)
+model_path1 = os.path.join(file_path, 'models', 'Yolov8', 'Mini', 'weights', 'best.pt')
+model_path2 = os.path.join(file_path, 'models', 'Yolov8', 'Medium', 'weights', 'best.pt')
+model_path3 = os.path.join(file_path, 'models', 'Yolov8', 'Large', 'weights', 'best.pt')
+model_path4 = os.path.join(file_path, 'models', 'Yolov8', 'Large XL', 'weights', 'best.pt')
+model1 = YOLO(model_path1)
+model2 = YOLO(model_path2)
+model3 = YOLO(model_path3)
+model4 = YOLO(model_path4)
 
-
-"""
-from detectron2.data.datasets import register_coco_instances
-register_coco_instances("my_dataset_train", {}, r"D:/HaxS/Dataset/Car dentss.v1i.coco-segmentation/train/_annotations.coco.json", r"D:/HaxS/Dataset/Car dentss.v1i.coco-segmentation/train")
-register_coco_instances("my_dataset_val", {}, r"D:/HaxS/Dataset/Car dentss.v1i.coco-segmentation/valid/_annotations.coco.json", r"D:/HaxS/Dataset/Car dentss.v1i.coco-segmentation/valid")
-
-train_metadata = MetadataCatalog.get("my_dataset_train")
-train_dataset_dicts = DatasetCatalog.get("my_dataset_train")
-val_metadata = MetadataCatalog.get("my_dataset_val")
-val_dataset_dicts = DatasetCatalog.get("my_dataset_val")
-
-from detectron2.engine import DefaultTrainer
-
-cfg = get_cfg()
-cfg.OUTPUT_DIR = "D:\\HaxS\\Tata_Innovent_2024\\models\\Detectron2\\Medium"
-cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
-cfg.DATASETS.TRAIN = ("my_dataset_train",)
-
-cfg.MODEL.ROI_HEADS.NUM_CLASSES = 3  # We have 4 classes.
-
-cfg.MODEL.WEIGHTS=os.path.join(cfg.OUTPUT_DIR,"model_final.pth")
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.6 # Custom
-predictor = DefaultPredictor(cfg)
-
-cfg1.merge_from_file(r"D:\\HaxS\\Tata_Innovent_2024\\models\\Detectron2\\Mini\\config.yaml")  # Path to your .yaml config file
-cfg1.MODEL.WEIGHTS = ("D:\\HaxS\\Tata_Innovent_2024\\models\\Detectron2\\Mini\\model_final.pth")  # Path to your fine-tuned model weights
-cfg1.MODEL.ROI_HEADS.NUM_CLASSES = 1  # Set this to the number of classes you have
-model6 = DefaultTrainer(cfg1)
-model6.resume_or_load(resume=False)  # Load the model weights
-"""
 app = Flask(__name__)
 
 UPLOAD_FOLDER = 'static/uploads'
 PROCESSED_FOLDER = 'static/processed'
+IMG_FOLDER = 'static/images'
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
+os.makedirs(IMG_FOLDER, exist_ok=True)
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 @app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/index')
 def index():
     return render_template('index.html')
+
+@app.route('/video')
+def video():
+    return render_template('video.html')
+
+@app.route('/live')
+def live():
+    return render_template('live.html')
 
 @app.route('/process', methods=['POST'])
 def process_file():
@@ -84,10 +66,6 @@ def process_file():
         model = model3
     elif model_choice == "model4":
         model = model4
-    elif model_choice == "model5":
-        model = model5
-    elif model_choice == "model6":
-        model = model6
     else:
         return jsonify({'error': 'Invalid model choice'}), 400
 
@@ -119,12 +97,167 @@ def process_file():
     processed_filepath = os.path.join(PROCESSED_FOLDER, filename)
     img_pil.save(processed_filepath, format='JPEG')  # Save as JPEG
 
+    report = model.track(img, conf=0.2)  # Replace with your image path
+
+    for r in report:
+        if r.boxes is not None:
+            # Convert results to list for further analysis
+            class_ids = r.boxes.cls.cpu().numpy().tolist()
+            class_names = [model.names[int(cls_id)] for cls_id in class_ids]
+
+            # Calculate mask areas
+            masks = r.masks.data  # Access the raw mask data
+            mask_areas = []
+
+            if masks is not None:
+                for mask in masks:
+                    # Convert each mask to binary format and calculate area
+                    binary_mask = mask.cpu().numpy()  # Get the numpy array representation of the mask
+                    area = cv2.countNonZero(binary_mask)  # Count non-zero pixels in the mask
+                    mask_areas.append(area)
+
+            #print("Object IDs:", object_ids)  # type <class 'list'>
+            print("Class IDs:", class_ids)
+            print("Class Names:", class_names)
+            print("Mask Areas:", mask_areas)  # List of areas for each detected object 
+        else:
+            print("No boxes detected in this report.")
+
+# Update JSON response
     return jsonify({
-        'aiResponse': 'Prediction successful',
-        'image_url': f'/static/processed/{filename}',
-        'helpline': 'Contact us at 1-800-CAR-HELP'
+        #'object_ids': object_ids,
+        'class_ids': class_ids,
+        'class_names': class_names,
+        'mask_areas': mask_areas,
+        'image_url': f'/static/processed/{filename}'
     })
 
+@app.route('/process-video', methods=['POST'])
+def process_video():
+    if 'video' not in request.files:
+        return jsonify({'error': 'No video file found in the request'}), 400
+    
+    file = request.files['video']
+    model_choice = request.form.get('model')
+    print(f"Model choice received: {model_choice}")
+
+    # Select the model
+    if model_choice == "model1":
+        model = model1
+    elif model_choice == "model2":
+        model = model2
+    elif model_choice == "model3":
+        model = model3
+    elif model_choice == "model4":
+        model = model4
+    else:
+        return jsonify({'error': 'Invalid model choice'}), 400
+
+    # Save the video file
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(filepath)
+
+    # Open the video file
+    cap = cv2.VideoCapture(filepath)
+    if not cap.isOpened():
+        return jsonify({'error': 'Invalid video file'}), 400
+
+    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # Define codec and create output path
+    fourcc = cv2.VideoWriter_fourcc(*'avc1')
+    
+    output_video_name = f'{filename}'
+    output_video_path = os.path.join(PROCESSED_FOLDER, output_video_name)
+    os.makedirs(PROCESSED_FOLDER, exist_ok=True)
+    out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
+    
+# Inside the frame processing loop
+    for _ in range(frame_count):
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Run model prediction
+        results = model.predict(frame, conf=0.2)
+        frame_with_boxes = results[0].plot()  # Annotated frame as numpy array
+        frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_RGB2BGR)  # Convert if needed
+        frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_BGR2RGB)
+
+        out.write(frame_with_boxes)
+
+    # Release resources
+    cap.release()
+    out.release()
+    # Return success response
+    return jsonify({
+        'message': 'Video processed successfully',
+        'processed_video_url': f'/static/processed/{output_video_name}'
+    }), 200
+
+
+def generate_frames(model):
+    # Try initializing the camera
+    camera = cv2.VideoCapture(0)  
+
+    # Check if the camera was opened correctly
+    if not camera.isOpened():
+        print("Error: Camera could not be opened.")
+        camera = None  # Set camera to None if unable to open
+
+    while True:
+        if camera is None:
+            break  # If the camera could not be opened, break the loop
+        success, frame = camera.read()  # Read the frame from the camera
+        if not success:
+            break
+        else:
+            # Encode the frame in JPEG format
+            ret, buffer = cv2.imencode('.jpg', frame)
+            if not ret:
+                print("Error: Unable to fetch frame.")
+                break
+            # Run inference on the current frame
+            results = model.predict(frame, stream=False)
+
+            # Access the first result from the list
+            result = results[0]
+
+            # Plot the predictions on the frame
+            annotated_frame = result.plot()
+            ret, buffer = cv2.imencode('.jpg', annotated_frame)
+            frame = buffer.tobytes()  # Convert to bytes
+
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # Yield the frame
+
+@app.route('/video_feed')
+def video_feed():
+    # Try initializing the camera
+    camera = cv2.VideoCapture(0) 
+
+    model_choice = request.args.get('model')
+    
+    if model_choice == "model1":
+        model = model1
+    elif model_choice == "model2":
+        model = model2
+    elif model_choice == "model3":
+        model = model3
+    elif model_choice == "model4":
+        model = model4
+    else:
+        return jsonify({'error': 'Invalid model choice'}), 400
+
+    if camera is None:
+        return jsonify({'error': 'Camera not available'}), 400
+
+    return Response(generate_frames(model),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/static/uploads/<filename>')
 def uploaded_file(filename):
