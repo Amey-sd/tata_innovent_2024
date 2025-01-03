@@ -1,7 +1,9 @@
 Flask
-opencv-python
+opencv-python-headless
 numpy
 matplotlib
+webcam
 Pillow
 torch==2.4.1 --find-links https://download.pytorch.org/whl/cpu
 ultralytics
+gunicorn

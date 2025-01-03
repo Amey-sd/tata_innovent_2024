@@ -2,13 +2,15 @@ from flask import Flask, request, jsonify, render_template, send_from_directory,
 from werkzeug.utils import secure_filename
 from ultralytics import YOLO
 import cv2
-import numpy as np
 import os
+import numpy as np
+import base64
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import io
 from PIL import Image
 import subprocess
+from webcam import Webcam
 
 file_path = os.path.dirname(__file__)
 model_path1 = os.path.join(file_path, 'models', 'Yolov8', 'Mini', 'weights', 'best.pt')
@@ -181,7 +183,7 @@ def process_video():
 
     # Define codec and create output path
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Initial codec for processing
-    processed_video_name = f'processed_{filename}'
+    processed_video_name = f'{filename}'
     processed_video_path = os.path.join(PROCESSED_FOLDER, processed_video_name)
     out = cv2.VideoWriter(processed_video_path, fourcc, fps, (width, height))
     
@@ -196,6 +198,7 @@ def process_video():
         frame_with_boxes = results[0].plot()  # Annotated frame as numpy array
         frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_RGB2BGR)  # Convert if needed
 
+        frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_BGR2RGB)
         out.write(frame_with_boxes)
 
     # Release resources
@@ -217,66 +220,64 @@ def process_video():
         'processed_video_url': f'/static/processed/{reencoded_video_name}'
     }), 200
 
+@app.route('/process_frame', methods=['POST'])
+def process_frame():
+    try:
+        # Parse incoming JSON data
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
 
-def generate_frames(model):
-    # Try initializing the camera from index 0 to 5
-    camera = None
-    for i in range(6):  # Check camera indices 0 to 5
-        camera = cv2.VideoCapture(i)
-        if camera.isOpened():
-            print(f"Camera found at index {i}")
-            break
-    if camera is None or not camera.isOpened():
-        print("Error: No camera available.")
-        return
+        # Extract and decode the image
+        image_data = data.get("image")
+        if not image_data:
+            return jsonify({'error': 'No image data provided'}), 400
 
-    while True:
-        success, frame = camera.read()  # Read the frame from the camera
-        if not success:
-            print("Failed to grab frame.")
-            break
+        # Remove the data URL prefix and decode
+        image_base64 = image_data.split(",")[1] if "," in image_data else image_data
+        image_bytes = base64.b64decode(image_base64)
 
-        # Run inference on the current frame
+        # Convert bytes to a NumPy array
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if frame is None:
+            return jsonify({'error': 'Invalid image data'}), 400
+
+        # Retrieve the selected model
+        model_choice = data.get('model')
+        if not model_choice:
+            return jsonify({'error': 'No model choice provided'}), 400
+
+        # Select the appropriate model
+        if model_choice == "model1":
+            model = model1
+        elif model_choice == "model2":
+            model = model2
+        elif model_choice == "model3":
+            model = model3
+        elif model_choice == "model4":
+            model = model4
+        else:
+            return jsonify({'error': 'Invalid model choice'}), 400
+
+        # Run YOLO inference
         results = model.predict(frame, stream=False)
+        if not results:
+            return jsonify({'error': 'No results from model'}), 500
 
-        # Access the first result from the list
         result = results[0]
 
-        # Plot the predictions on the frame
+        # Annotate frame with predictions
         annotated_frame = result.plot()
 
-        # Encode the annotated frame in JPEG format
-        ret, buffer = cv2.imencode('.jpg', annotated_frame)
-        if not ret:
-            print("Error: Unable to encode frame.")
-            break
-        frame_bytes = buffer.tobytes()  # Convert frame to bytes
+        # Encode annotated frame as base64
+        _, buffer = cv2.imencode('.jpg', annotated_frame)
+        response_base64 = base64.b64encode(buffer).decode('utf-8')
 
-        # Yield the frame as multipart response for MJPEG streaming
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-
-    camera.release()
-
-@app.route('/video_feed')
-def video_feed():
-    model_choice = request.args.get('model')
-
-    # Select the model based on the user's choice
-    if model_choice == "model1":
-        model = model1
-    elif model_choice == "model2":
-        model = model2
-    elif model_choice == "model3":
-        model = model3
-    elif model_choice == "model4":
-        model = model4
-    else:
-        return jsonify({'error': 'Invalid model choice'}), 400
-
-    # Start video feed and generate frames
-    return Response(generate_frames(model),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+        return jsonify({"image": f"data:image/jpeg;base64,{response_base64}"})
+    except Exception as e:
+        print(f"Error processing frame: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/static/uploads/<filename>')
 def uploaded_file(filename):
