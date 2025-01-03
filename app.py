@@ -10,7 +10,6 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import io
 from PIL import Image
 import subprocess
-from webcam import Webcam
 
 file_path = os.path.dirname(__file__)
 model_path1 = os.path.join(file_path, 'models', 'Yolov8', 'Mini', 'weights', 'best.pt')
