@@ -100,14 +100,26 @@ def process_file():
 
     report = model.track(img, conf=0.2)  # Replace with your image path
 
+# Loop through each report
     for r in report:
+        # Display the image as is
+        if hasattr(r, 'image') and r.image is not None:
+            # Assuming the original image is accessible via r.image
+            original_image = r.image
+            plt.imshow(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
+            plt.axis('off')
+            plt.title("Original Image")
+            plt.show()
+        else:
+            print("No image found in the report.")
+
         if r.boxes is not None:
             # Convert results to list for further analysis
             class_ids = r.boxes.cls.cpu().numpy().tolist()
             class_names = [model.names[int(cls_id)] for cls_id in class_ids]
 
             # Calculate mask areas
-            masks = r.masks.data  # Access the raw mask data
+            masks = r.masks.data if r.masks is not None else None  # Access the raw mask data
             mask_areas = []
 
             if masks is not None:
@@ -117,21 +129,21 @@ def process_file():
                     area = cv2.countNonZero(binary_mask)  # Count non-zero pixels in the mask
                     mask_areas.append(area)
 
-            #print("Object IDs:", object_ids)  # type <class 'list'>
             print("Class IDs:", class_ids)
             print("Class Names:", class_names)
-            print("Mask Areas:", mask_areas)  # List of areas for each detected object 
+            print("Mask Areas:", mask_areas)  # List of areas for each detected object
         else:
             print("No boxes detected in this report.")
 
-# Update JSON response
-    return jsonify({
-        #'object_ids': object_ids,
-        'class_ids': class_ids,
-        'class_names': class_names,
-        'mask_areas': mask_areas,
-        'image_url': f'/static/processed/{filename}'
-    })
+
+    # Update JSON response
+        return jsonify({
+            #'object_ids': object_ids,
+            'class_ids': class_ids,
+            'class_names': class_names,
+            'mask_areas': mask_areas,
+            'image_url': f'/static/processed/{filename}'
+        })
 
 def reencode_video(input_path, output_path):
     """Re-encode video to H.264 using FFmpeg."""
