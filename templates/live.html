@@ -31,7 +31,7 @@
             </select>
             <button type="button" id="submit-video-button">Get Live Feed</button>
         </form>
-        <video id="live-video" autoplay style="width: 640px; height: auto; display: none;"></video>
+        <video id="live-video" autoplay style="width: auto; height: auto; display: none; "></video>
         <img id="processed-video-feed" src="" alt="Processed Video Feed" style="display: none;">
         <button type="button" id="stop-live-button">Stop</button>
     </div>
@@ -52,7 +52,7 @@
                 // Start the webcam feed
                 mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }});
                 liveVideo.srcObject = mediaStream;
-                liveVideo.style.display = 'block';
+                liveVideo.style.display = 'none';
 
                 // Show the processed video feed
                 processedVideoFeed.style.display = 'block';
