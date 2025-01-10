@@ -4,12 +4,14 @@ from ultralytics import YOLO
 import cv2
 import os
 import numpy as np
+import pandas as pd
 import base64
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import io
 from PIL import Image
 import subprocess
+from document import prepare_report_data
 
 file_path = os.path.dirname(__file__)
 model_path1 = os.path.join(file_path, 'models', 'Yolov8', 'Mini', 'weights', 'best.pt')
@@ -26,6 +28,10 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'static/uploads'
 PROCESSED_FOLDER = 'static/processed'
 IMG_FOLDER = 'static/images'
+DOC_FOLDER = 'doc'
+csv = os.path.join(DOC_FOLDER, 'data.csv')
+template = os.path.join(DOC_FOLDER, 'template.docx')
+output = os.path.join(DOC_FOLDER, 'Report.docx')
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
@@ -116,6 +122,7 @@ def process_file():
         if r.boxes is not None:
             # Convert results to list for further analysis
             class_ids = r.boxes.cls.cpu().numpy().tolist()
+            class_ids = [int(cls_id) for cls_id in class_ids]
             class_names = [model.names[int(cls_id)] for cls_id in class_ids]
 
             # Calculate mask areas
@@ -132,6 +139,17 @@ def process_file():
             print("Class IDs:", class_ids)
             print("Class Names:", class_names)
             print("Mask Areas:", mask_areas)  # List of areas for each detected object
+
+            
+            data = {
+                "Class ID": class_ids,
+                "Damage Type": class_names,
+                "Area": mask_areas
+            }
+            df = pd.DataFrame(data)
+            df.to_csv(csv, index=False)
+
+            prepare_report_data(csv, template, output)
         else:
             print("No boxes detected in this report.")
 
@@ -297,6 +315,11 @@ def uploaded_file(filename):
 @app.route('/static/processed/<filename>')
 def processed_file(filename):
     return send_from_directory(PROCESSED_FOLDER, filename)
+    
+@app.route('/doc/<filename>')
+def processed_doc(filename):
+    if filename == 'Report.docx':
+        return send_from_directory(DOC_FOLDER, filename)
 
 if __name__ == '__main__':
     app.run(debug=True)
