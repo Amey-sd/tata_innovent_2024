@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, send_from_directory, Response
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from werkzeug.utils import secure_filename
 from ultralytics import YOLO
 import cv2
@@ -14,13 +14,7 @@ import subprocess
 from document import prepare_report_data
 
 file_path = os.path.dirname(__file__)
-model_path1 = os.path.join(file_path, 'models', 'Yolov8', 'Mini', 'weights', 'best.pt')
-model_path2 = os.path.join(file_path, 'models', 'Yolov8', 'Medium', 'weights', 'best.pt')
-model_path3 = os.path.join(file_path, 'models', 'Yolov8', 'Large', 'weights', 'best.pt')
 model_path4 = os.path.join(file_path, 'models', 'Yolov8', 'Large XL', 'weights', 'best.pt')
-model1 = YOLO(model_path1)
-model2 = YOLO(model_path2)
-model3 = YOLO(model_path3)
 model4 = YOLO(model_path4)
 
 app = Flask(__name__)
@@ -41,13 +35,21 @@ os.makedirs(IMG_FOLDER, exist_ok=True)
 def about():
     return render_template('about.html')
 
+@app.route('/features')
+def features():
+    return render_template('features.html')
+
+@app.route('/documentation')
+def documentation():
+    return render_template('documentation.html')
+
 @app.route('/')
 def home():
     return render_template('home.html')
 
-@app.route('/index')
+@app.route('/image')
 def index():
-    return render_template('index.html')
+    return render_template('image.html')
 
 @app.route('/video')
 def video():
@@ -65,13 +67,7 @@ def process_file():
     file = request.files['file']
     model_choice = request.form.get('model')
     
-    if model_choice == "model1":
-        model = model1
-    elif model_choice == "model2":
-        model = model2
-    elif model_choice == "model3":
-        model = model3
-    elif model_choice == "model4":
+    if model_choice == "model4":
         model = model4
     else:
         return jsonify({'error': 'Invalid model choice'}), 400
@@ -184,13 +180,7 @@ def process_video():
     print(f"Model choice received: {model_choice}")
 
     # Select the model
-    if model_choice == "model1":
-        model = model1
-    elif model_choice == "model2":
-        model = model2
-    elif model_choice == "model3":
-        model = model3
-    elif model_choice == "model4":
+    if model_choice == "model4":
         model = model4
     else:
         return jsonify({'error': 'Invalid model choice'}), 400
@@ -278,13 +268,7 @@ def process_frame():
             return jsonify({'error': 'No model choice provided'}), 400
 
         # Select the appropriate model
-        if model_choice == "model1":
-            model = model1
-        elif model_choice == "model2":
-            model = model2
-        elif model_choice == "model3":
-            model = model3
-        elif model_choice == "model4":
+        if model_choice == "model4":
             model = model4
         else:
             return jsonify({'error': 'Invalid model choice'}), 400

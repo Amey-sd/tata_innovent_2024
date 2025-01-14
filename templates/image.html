@@ -11,7 +11,7 @@
             <h2>DefectVision</h2>
         </div>
         <nav>
-            <a href="/">Home</a>https://d12e-115-249-160-237.ngrok-free.app
+            <a href="/">Home</a>
             <a href="/features">Features</a>
             <a href="/documentation">Documentation</a>
             <div class="dropdown">
@@ -27,31 +27,25 @@
             <a href="/about" style="margin-right: 10px;">About</a>
         </div>
     </header>
-    <div class="grid-container">
-        <div><a href="/">Home</a></div>
-        <div class="dropdown">
-            <button class="dropbtn">Inference</button>
-            <div class="dropdown-content">
-                <a href="/index">Image</a>
-                <a href="/video">Video</a>
-                <a href="/live">Live</a>
-            </div>
-        </div> 
-        <div><a href="/about">About</a></div>
-    </div>
-    
+
     <div class="container">
         <form id="upload-form">
+            <label for="file-upload">Upload Car Image:</label>
+            <input type="file" id="file-upload" accept="image/*">
             <select id="model-select" style="display: none;">
-                <option value="model4">Model 4: Yolov8 Large XL</option>
+                <option value="model4"></option>
             </select>
-            <button type="button" id="submit-video-button">Get Live Feed</button>
+            <button type="button" id="submit-button">Submit for Analysis</button>
         </form>
-        <video id="live-video" autoplay style="width: auto; height: auto; display: none; "></video>
-        <img id="processed-video-feed" src="" alt="Processed Video Feed" style="display: none;">
-        <button type="button" id="stop-live-button">Stop</button>
+
+        <div id="results" style="display: none;">
+            <h2>Analysis Results</h2>
+            <h3>Download Report</h3>
+            <a href="/doc/Report.docx" target="_blank" id="download-link">Download Report.docx</a>
+            <h3>Processed Image</h3>
+            <img id="generated-image" alt="Processed Image">
+        </div>        
     </div>
-    
-    <script src="static/live.js"></script>
+    <script src="static/script.js"></script>
 </body>
 </html>

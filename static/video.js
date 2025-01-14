@@ -3,6 +3,7 @@ document.getElementById("video-button").addEventListener("click", async function
     const fileInput = document.getElementById("file-upload");
     const modelSelect = document.getElementById("model-select");
     const aiResponse = document.getElementById("ai-response");
+    const loadingIndicator = document.getElementById("loading-indicator");
 
     // Get the selected file and model
     const file = fileInput.files[0];
@@ -19,12 +20,19 @@ document.getElementById("video-button").addEventListener("click", async function
     formData.append("video", file); // Ensure the key matches Flask backend
     formData.append("model", model);
 
+    // Show loading indicator
+    loadingIndicator.style.display = "block";
+    aiResponse.innerText = "";
+
     try {
         // Make the request to the backend
         const response = await fetch("/process-video", {
             method: "POST",
             body: formData,
         });
+
+        // Hide loading indicator
+        loadingIndicator.style.display = "none";
 
         // Handle response
         if (response.ok) {
@@ -50,6 +58,9 @@ document.getElementById("video-button").addEventListener("click", async function
             aiResponse.innerText = `Error: ${errorData.error || "An unexpected error occurred."}`;
         }
     } catch (error) {
+        // Hide loading indicator in case of an error
+        loadingIndicator.style.display = "none";
+
         // Handle client-side errors
         console.error("An error occurred:", error);
         aiResponse.innerText = "An error occurred while processing the video. Please try again.";
