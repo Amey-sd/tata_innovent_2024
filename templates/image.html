@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DefectVision</title>
+    <link rel="icon" href="static/images/logo.jpg" type="image/x-icon">
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo" style="display: flex; align-items: center;">
+            <img src="static/images/logo.jpg" alt="DefectVision Logo" style="width: 50px; height: auto; margin-right: 10px;">
+            <h2>DefectVision</h2>
+        </div>
+        
+        <input type="checkbox" id="menu-toggle" class="menu-toggle">
+        <label for="menu-toggle" class="hamburger">&#9776;</label>
+    
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/features">Features</a>
+            <a href="/documentation">Documentation</a>
+            <div class="dropdown">
+                <button class="dropdown-btn">Inference</button>
+                <div class="dropdown-content">
+                    <a href="/image">Image</a>
+                    <a href="/video">Video</a>
+                    <a href="/live">Live</a>
+                </div>
+            </div>
+            <a href="/about">About</a>
+        </nav>
+    
+        <div>
+            <img src="{{ url_for('static', filename='images/innovent.png') }}" alt="Feedback Section Image" style="width: 100%; border-radius: 10px; margin-right: 10px;">
+        </div>
+    </header>
+
+    <div class="container">
+        <form id="upload-form">
+            <label for="file-upload">Upload Car Image:</label>
+            <input type="file" id="file-upload" accept="image/*">
+            <select id="model-select" style="display: none;">
+                <option value="model4"></option>
+            </select>
+            <button type="button" id="submit-button">Submit for Analysis</button>
+        </form>
+
+        <div id="results" style="display: none;">
+            <h2>Analysis Results</h2>
+            <h3>Download Report</h3>
+            <a href="/doc/Report.docx" target="_blank" id="download-link">Download Report.docx</a>
+            <h3>Processed Image</h3>
+            <img id="generated-image" alt="Processed Image">
+        </div>        
+    </div>
+    <script src="static/script.js"></script>
+</body>
+</html>

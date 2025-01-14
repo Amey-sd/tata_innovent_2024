@@ -1,44 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DefectVision AI (Dark Mode)</title>
+    <title>DefectVision</title>
+    <link rel="icon" href="static/images/logo.jpg" type="image/x-icon">
     <link rel="stylesheet" href="static/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
-
 <body>
-    <div class="grid-container">
-        <div><a href="/">Home</a></div>
-        <div class="dropdown">
-            <button class="dropbtn">Inference</button>
-            <div class="dropdown-content">
-                <a href="/index">Image</a>
-                <a href="/video">Video</a>
-                <a href="/live">Live</a>
-            </div>
+    <header>
+        <div class="logo" style="display: flex; align-items: center;">
+            <img src="static/images/logo.jpg" alt="DefectVision Logo" style="width: 50px; height: auto; margin-right: 10px;">
+            <h2>DefectVision</h2>
         </div>
-        <div><a href="/about">About</a></div>
-    </div>
-
+        
+        <input type="checkbox" id="menu-toggle" class="menu-toggle">
+        <label for="menu-toggle" class="hamburger">&#9776;</label>
+    
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/features">Features</a>
+            <a href="/documentation">Documentation</a>
+            <div class="dropdown">
+                <button class="dropdown-btn">Inference</button>
+                <div class="dropdown-content">
+                    <a href="/image">Image</a>
+                    <a href="/video">Video</a>
+                    <a href="/live">Live</a>
+                </div>
+            </div>
+            <a href="/about">About</a>
+        </nav>
+    
+        <div>
+            <img src="{{ url_for('static', filename='images/innovent.png') }}" alt="Feedback Section Image" style="width: 100%; border-radius: 10px; margin-right: 10px;">
+        </div>
+    </header>
     <div class="container">
         <form id="upload-form" enctype="multipart/form-data">
             <label for="file-upload">Upload Car Video:</label>
             <input type="file" id="file-upload" name="video" accept="video/*" required>
-            <label for="model-select">Choose a Detection Model:</label>
-            <select id="model-select" name="model" required>
-                <option value="model1">Model 1: Yolov8 Medium</option>
-                <option value="model2">Model 2: Yolov8 Mini</option>
-                <option value="model3">Model 3: Yolov8 Large</option>
-                <option value="model4">Model 4: Yolov8 Large XL</option>
+            <select id="model-select" name="model" required style="display: none;">
+                <option value="model4"></option>
             </select>
             <button type="button" id="video-button">Submit for Analysis</button>
         </form>
+
+        <div id="loading-indicator">
+            <p>Processing your video, please wait...</p>
+            <div class="spinner"></div>
+        </div>
         
         <div id="results" style="display:none;">
             <h2>Analysis Results</h2>
+            <h3>Download Report</h3>
+            <a href="/doc/defect_log.csv" target="_blank" id="download-link">Download the defect log</a>
             <p id="ai-response"></p>
             <div id="download-link" style="display:none;">
                 <p><a id="download-button" href="" target="_blank" download="processed_video.mp4">Click here to download the processed video</a></p>

@@ -11,13 +11,7 @@ from PIL import Image
 from document import prepare_report_data
 
 file_path = os.path.dirname(__file__)
-model_path1 = os.path.join(file_path, 'models', 'Yolov8', 'Mini', 'weights', 'best.pt')
-model_path2 = os.path.join(file_path, 'models', 'Yolov8', 'Medium', 'weights', 'best.pt')
-model_path3 = os.path.join(file_path, 'models', 'Yolov8', 'Large', 'weights', 'best.pt')
 model_path4 = os.path.join(file_path, 'models', 'Yolov8', 'Large XL', 'weights', 'best.pt')
-model1 = YOLO(model_path1)
-model2 = YOLO(model_path2)
-model3 = YOLO(model_path3)
 model4 = YOLO(model_path4)
 
 app = Flask(__name__)
@@ -26,6 +20,7 @@ UPLOAD_FOLDER = 'static/uploads'
 PROCESSED_FOLDER = 'static/processed'
 IMG_FOLDER = 'static/images'
 DOC_FOLDER = 'doc'
+LOG_FILE = os.path.join(DOC_FOLDER, 'defect_log.csv')
 csv = os.path.join(DOC_FOLDER, 'data.csv')
 template = os.path.join(DOC_FOLDER, 'template.docx')
 output = os.path.join(DOC_FOLDER, 'Report.docx')
@@ -42,9 +37,9 @@ def about():
 def home():
     return render_template('home.html')
 
-@app.route('/index')
+@app.route('/image')
 def index():
-    return render_template('index.html')
+    return render_template('image.html')
 
 @app.route('/video')
 def video():
@@ -54,6 +49,14 @@ def video():
 def live():
     return render_template('live.html')
 
+@app.route('/documentation')
+def documentation():
+    return render_template('documentation.html')
+
+@app.route('/features')
+def features():
+    return render_template('features.html')
+
 @app.route('/process', methods=['POST'])
 def process_file():
     if 'file' not in request.files:
@@ -62,13 +65,7 @@ def process_file():
     file = request.files['file']
     model_choice = request.form.get('model')
     
-    if model_choice == "model1":
-        model = model1
-    elif model_choice == "model2":
-        model = model2
-    elif model_choice == "model3":
-        model = model3
-    elif model_choice == "model4":
+    if model_choice == "model4":
         model = model4
     else:
         return jsonify({'error': 'Invalid model choice'}), 400
@@ -165,13 +162,7 @@ def process_video():
     print(f"Model choice received: {model_choice}")
 
     # Select the model
-    if model_choice == "model1":
-        model = model1
-    elif model_choice == "model2":
-        model = model2
-    elif model_choice == "model3":
-        model = model3
-    elif model_choice == "model4":
+    if model_choice == "model4":
         model = model4
     else:
         return jsonify({'error': 'Invalid model choice'}), 400
@@ -197,87 +188,125 @@ def process_video():
     output_video_name = f'{filename}'
     output_video_path = os.path.join(PROCESSED_FOLDER, output_video_name)
     os.makedirs(PROCESSED_FOLDER, exist_ok=True)
-    out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
     
-# Inside the frame processing loop
-    for _ in range(frame_count):
-        ret, frame = cap.read()
-        if not ret:
-            break
+    out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
 
-        # Run model prediction
-        results = model.predict(frame, conf=0.2)
-        frame_with_boxes = results[0].plot()  # Annotated frame as numpy array
-        frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_RGB2BGR)  # Convert if needed
-        frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_BGR2RGB)
+    # Open log file for writing defects
+    with open(LOG_FILE, 'w') as log_file:
+        log_file.write("Frame Number, Defect Type, Bounding Box\n")  # Header for log file
 
-        out.write(frame_with_boxes)
+        # Frame processing loop
+        for frame_number in range(frame_count):
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            # Run model prediction
+            results = model.predict(frame, conf=0.2)
+
+            # Extract class IDs and names from results
+            class_ids = results[0].boxes.cls.cpu().numpy().tolist()
+            class_ids = [int(cls_id) for cls_id in class_ids]
+            class_names = [model.names[int(cls_id)] for cls_id in class_ids]
+
+            frame_with_boxes = results[0].plot()  # Annotated frame as numpy array
+            
+            # Check if any boxes were detected
+            if len(results[0].boxes.xyxy) > 0:
+                for box_idx in range(len(results[0].boxes.xyxy)):
+                    box = results[0].boxes.xyxy[box_idx]  # Get each bounding box
+                    x1, y1, x2, y2 = map(int, box[:4])  # Extract bounding box coordinates
+                    
+                    # Write to log file for each detected defect
+                    defect_type = class_names[box_idx]  # Get corresponding defect type
+                    log_file.write(f"{frame_number}, {defect_type}, ({x1}, {y1}), ({x2}, {y2})\n")
+
+            frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_RGB2BGR)
+            frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_BGR2RGB)  # Convert if needed
+            
+            out.write(frame_with_boxes)
 
     # Release resources
     cap.release()
     out.release()
+    
     # Return success response
     return jsonify({
         'message': 'Video processed successfully',
-        'processed_video_url': f'/static/processed/{output_video_name}'
+        'processed_video_url': f'/static/processed/{output_video_name}',
+        'defect_log_url': f'/{LOG_FILE}'  # Provide a URL to access the log file if needed
     }), 200
+
 
 
 def generate_frames(model):
     # Try initializing the camera
-    camera = cv2.VideoCapture(0)  
+    camera = cv2.VideoCapture(0)
 
     # Check if the camera was opened correctly
     if not camera.isOpened():
         print("Error: Camera could not be opened.")
         camera = None  # Set camera to None if unable to open
 
-    while True:
-        if camera is None:
-            break  # If the camera could not be opened, break the loop
-        success, frame = camera.read()  # Read the frame from the camera
-        if not success:
-            break
-        else:
-            # Encode the frame in JPEG format
-            ret, buffer = cv2.imencode('.jpg', frame)
-            if not ret:
-                print("Error: Unable to fetch frame.")
+    # Open log file for writing defects
+    with open(LOG_FILE, 'w') as log_file:
+        log_file.write("Frame Number, Defect Type, Bounding Box\n")  # Header for log file
+        
+        frame_number = 0  # Initialize frame counter
+
+        while True:
+            if camera is None:
+                break  # If the camera could not be opened, break the loop
+            
+            success, frame = camera.read()  # Read the frame from the camera
+            if not success:
                 break
+            
             # Run inference on the current frame
             results = model.predict(frame, stream=False)
 
             # Access the first result from the list
             result = results[0]
 
+            # Extract class IDs and names from results
+            class_ids = result.boxes.cls.cpu().numpy().tolist()
+            class_ids = [int(cls_id) for cls_id in class_ids]
+            class_names = [model.names[int(cls_id)] for cls_id in class_ids]
+
+            # Log defects for each detected object
+            for box_idx in range(len(result.boxes.xyxy)):
+                box = result.boxes.xyxy[box_idx]  # Get each bounding box
+                x1, y1, x2, y2 = map(int, box[:4])  # Extract bounding box coordinates
+                
+                defect_type = class_names[box_idx]  # Get corresponding defect type
+                
+                # Write to log file for each detected defect
+                log_file.write(f"{frame_number}, {defect_type}, ({x1}, {y1}), ({x2}, {y2})\n")
+
             # Plot the predictions on the frame
             annotated_frame = result.plot()
+
+            # Encode the annotated frame in JPEG format
             ret, buffer = cv2.imencode('.jpg', annotated_frame)
-            frame = buffer.tobytes()  # Convert to bytes
+            if not ret:
+                print("Error: Unable to fetch frame.")
+                break
+            
+            frame_bytes = buffer.tobytes()  # Convert to bytes
 
             yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # Yield the frame
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')  # Yield the frame
+            
+            frame_number += 1  # Increment frame counter
 
 @app.route('/video_feed')
 def video_feed():
-    # Try initializing the camera
-    camera = cv2.VideoCapture(0) 
-
     model_choice = request.args.get('model')
     
-    if model_choice == "model1":
-        model = model1
-    elif model_choice == "model2":
-        model = model2
-    elif model_choice == "model3":
-        model = model3
-    elif model_choice == "model4":
+    if model_choice == "model4":
         model = model4
     else:
         return jsonify({'error': 'Invalid model choice'}), 400
-
-    if camera is None:
-        return jsonify({'error': 'Camera not available'}), 400
 
     return Response(generate_frames(model),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -293,6 +322,8 @@ def processed_file(filename):
 @app.route('/doc/<filename>')
 def processed_doc(filename):
     if filename == 'Report.docx':
+        return send_from_directory(DOC_FOLDER, filename)
+    elif filename == 'defect_log.csv':
         return send_from_directory(DOC_FOLDER, filename)
     
 if __name__ == '__main__':
