@@ -1,16 +1,23 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DefectVision</title>
+    <link rel="icon" href="static/images/logo.jpg" type="image/x-icon">
     <link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
     <header>
-        <div class="logo">
+        <div class="logo" style="display: flex; align-items: center;">
+            <img src="static/images/logo.jpg" alt="DefectVision Logo" style="width: 50px; height: auto; margin-right: 10px;">
             <h2>DefectVision</h2>
         </div>
-        <nav>
+        
+        <input type="checkbox" id="menu-toggle" class="menu-toggle">
+        <label for="menu-toggle" class="hamburger">&#9776;</label>
+    
+        <nav class="nav-links">
             <a href="/">Home</a>
             <a href="/features">Features</a>
             <a href="/documentation">Documentation</a>
@@ -22,10 +29,211 @@
                     <a href="/live">Live</a>
                 </div>
             </div>
+            <a href="/about">About</a>
         </nav>
+    
         <div>
-            <a href="/about" style="margin-right: 10px;">About</a>
+            <img src="{{ url_for('static', filename='images/innovent.png') }}" alt="Feedback Section Image" style="width: 100%; border-radius: 10px; margin-right: 10px;">
         </div>
     </header>
+    <main class="main">
+        <h3 id="-salient-features-"><strong>Salient Features</strong></h3>
+        <p>Our AI-driven solution offers a comprehensive suite of cutting-edge features designed to enhance defect detection and streamline operational workflows:  </p>
+        <h4 id="-1-automated-defect-detection-"><strong>1. Automated Defect Detection</strong></h4>
+        <ul>
+        <li><strong>Precision and Speed</strong>: Utilizes advanced models like YOLOv8 and Detectron2 to identify defects with high accuracy and rapid processing speeds.  </li>
+        <li><strong>Reduced Manual Effort</strong>: Automates the analysis process, eliminating the need for extensive human intervention.  </li>
+        </ul>
+        <h4 id="-2-real-time-monitoring-"><strong>2. Real-Time Monitoring</strong></h4>
+        <ul>
+        <li><strong>Live Detection</strong>: Supports real-time monitoring to promptly identify defects as they occur.  </li>
+        <li><strong>Dynamic Environments</strong>: Capable of processing video streams for continuous analysis in dynamic industrial setups.  </li>
+        </ul>
+        <h4 id="-3-scalability-and-flexibility-"><strong>3. Scalability and Flexibility</strong></h4>
+        <ul>
+        <li><strong>Adaptable Architecture</strong>: Seamlessly integrates with existing workflows, supporting multiple AI frameworks and cloud-based solutions.  </li>
+        <li><strong>Cloud Deployment</strong>: Leveraging Azure Cloud ensures scalability and accessibility from anywhere.  </li>
+        </ul>
+        <h4 id="-4-advanced-ai-integration-"><strong>4. Advanced AI Integration</strong></h4>
+        <ul>
+        <li><strong>State-of-the-Art Models</strong>: Incorporates cutting-edge architectures like SAM, Pali-Gemma, and Grounding DINO to handle complex defect scenarios.  </li>
+        <li><strong>Deep Learning Frameworks</strong>: Built using TensorFlow and PyTorch for robust and reliable performance.  </li>
+        </ul>
+        <h4 id="-5-user-centric-design-"><strong>5. User-Centric Design</strong></h4>
+        <ul>
+        <li><strong>Web Integration</strong>: Provides a user-friendly interface built on Flask for easy access and usability.  </li>
+        <li><strong>Cross-Platform Support</strong>: Accessible via web and mobile, ensuring operational flexibility.  </li>
+        </ul>
+        <h4 id="-6-continuous-innovation-"><strong>6. Continuous Innovation</strong></h4>
+        <ul>
+        <li><strong>Ongoing Updates</strong>: Regular enhancements using the latest advancements in AI and defect detection technologies.  </li>
+        <li><strong>Version Control</strong>: Maintains streamlined project management through Git and GitHub for collaborative development.  </li>
+        </ul>
+        <h4 id="-7-enhanced-efficiency-"><strong>7. Enhanced Efficiency</strong></h4>
+        <ul>
+        <li><strong>Operational Optimization</strong>: Delivers significant time and cost savings for defect detection in industrial and manufacturing domains.  </li>
+        <li><strong>Reliable Insights</strong>: Offers actionable insights to domain experts, driving informed decision-making.  </li>
+        </ul>
+        <h2 id="model-comparison-table">Model Comparison Table</h2>
+        <table>
+        <thead>
+        <tr>
+        <th>Model</th>
+        <th>Batch Size</th>
+        <th>Epochs</th>
+        <th>Size (MB)</th>
+        <th>mAP^val</th>
+        <th>Speed (ms)</th>
+        <th>Params (M)</th>
+        <th>FLOPs (G)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td>Default</td>
+        <td>64</td>
+        <td>200</td>
+        <td>12.5</td>
+        <td>45.3</td>
+        <td>23.5</td>
+        <td>3000</td>
+        <td>6.5</td>
+        </tr>
+        <tr>
+        <td>Grounding DINO Pro</td>
+        <td>64</td>
+        <td>200</td>
+        <td>12.8</td>
+        <td>52.5</td>
+        <td>131.0</td>
+        <td>174</td>
+        <td>15.8</td>
+        </tr>
+        <tr>
+        <td>Grounding DINO Edge</td>
+        <td>64</td>
+        <td>200</td>
+        <td>12.8</td>
+        <td>48.0</td>
+        <td>98.0</td>
+        <td>341</td>
+        <td>15.8</td>
+        </tr>
+        <tr>
+        <td>Mini</td>
+        <td>16</td>
+        <td>200</td>
+        <td>358</td>
+        <td>39.5</td>
+        <td>51096</td>
+        <td>94.7</td>
+        <td>12.4</td>
+        </tr>
+        <tr>
+        <td>Medium</td>
+        <td>32</td>
+        <td>200</td>
+        <td>358</td>
+        <td>42.5</td>
+        <td>51096</td>
+        <td>94.7</td>
+        <td>35.6</td>
+        </tr>
+        <tr>
+        <td>Mask R-CNN R50-FPN</td>
+        <td>32</td>
+        <td>200</td>
+        <td>366</td>
+        <td>37.8</td>
+        <td>16.1</td>
+        <td>44.5</td>
+        <td>180</td>
+        </tr>
+        <tr>
+        <td>Faster R-CNN R50-FPN</td>
+        <td>64</td>
+        <td>200</td>
+        <td>366</td>
+        <td>36.2</td>
+        <td>10.7</td>
+        <td>41.5</td>
+        <td>200</td>
+        </tr>
+        <tr>
+        <td>RetinaNet R50</td>
+        <td>128</td>
+        <td>200</td>
+        <td>366</td>
+        <td>36.8</td>
+        <td>9.2</td>
+        <td>36.2</td>
+        <td>180</td>
+        </tr>
+        <tr>
+        <td>Yolo_v11_Mini</td>
+        <td>16</td>
+        <td>200</td>
+        <td>640</td>
+        <td>39.5</td>
+        <td>56.1 ± 0.8</td>
+        <td>2.6</td>
+        <td>6.5</td>
+        </tr>
+        <tr>
+        <td>Yolo_v11_Medium</td>
+        <td>32</td>
+        <td>200</td>
+        <td>640</td>
+        <td>47.0</td>
+        <td>90.0 ±1.2</td>
+        <td>9.4</td>
+        <td>21.5</td>
+        </tr>
+        <tr>
+        <td>Yolo_v8_Mini</td>
+        <td>16</td>
+        <td>200</td>
+        <td>640</td>
+        <td>37.3</td>
+        <td>80.4</td>
+        <td>3.2</td>
+        <td>8.7</td>
+        </tr>
+        <tr>
+        <td>Yolo_v8_Medium</td>
+        <td>32</td>
+        <td>200</td>
+        <td>640</td>
+        <td>44.9</td>
+        <td>128.4</td>
+        <td>11.2</td>
+        <td>28.6</td>
+        </tr>
+        <tr>
+        <td>Yolo_v8_Large</td>
+        <td>64</td>
+        <td>200</td>
+        <td>640</td>
+        <td>50.2</td>
+        <td>234.7</td>
+        <td>25.9</td>
+        <td>78.9</td>
+        </tr>
+        <tr>
+        <td>Yolo_v8_Large_XL</td>
+        <td>128</td>
+        <td>1000</td>
+        <td>640</td>
+        <td>52.9</td>
+        <td>375.2</td>
+        <td>43.7</td>
+        <td>165.2</td>
+        </tr>
+        </tbody>
+        </table>
+        <h2 id="best-model-analysis">Best Model Analysis</h2>
+        <p>After analyzing the performance metrics across various models, the standout model is the <strong>Large_XL</strong>, which achieved the highest mean Average Precision (mAP^val) of <strong>52.9</strong>, indicating exceptional accuracy and performance in computer vision tasks.</p>
+        <p>These features collectively position our solution as a transformative tool in defect detection, delivering unprecedented accuracy, efficiency, and scalability for modern industrial needs.</p>
+    </main>
 </body>
 </html>

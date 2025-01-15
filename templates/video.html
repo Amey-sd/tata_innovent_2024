@@ -1,16 +1,23 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DefectVision</title>
+    <link rel="icon" href="static/images/logo.jpg" type="image/x-icon">
     <link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
     <header>
-        <div class="logo">
+        <div class="logo" style="display: flex; align-items: center;">
+            <img src="static/images/logo.jpg" alt="DefectVision Logo" style="width: 50px; height: auto; margin-right: 10px;">
             <h2>DefectVision</h2>
         </div>
-        <nav>
+        
+        <input type="checkbox" id="menu-toggle" class="menu-toggle">
+        <label for="menu-toggle" class="hamburger">&#9776;</label>
+    
+        <nav class="nav-links">
             <a href="/">Home</a>
             <a href="/features">Features</a>
             <a href="/documentation">Documentation</a>
@@ -22,9 +29,11 @@
                     <a href="/live">Live</a>
                 </div>
             </div>
+            <a href="/about">About</a>
         </nav>
+    
         <div>
-            <a href="/about" style="margin-right: 10px;">About</a>
+            <img src="{{ url_for('static', filename='images/innovent.png') }}" alt="Feedback Section Image" style="width: 100%; border-radius: 10px; margin-right: 10px;">
         </div>
     </header>
     <div class="container">
@@ -44,6 +53,8 @@
         
         <div id="results" style="display:none;">
             <h2>Analysis Results</h2>
+            <h3>Download Report</h3>
+            <a href="/doc/defect_log.csv" target="_blank" id="download-link">Download the defect log</a>
             <p id="ai-response"></p>
             <div id="download-link" style="display:none;">
                 <p><a id="download-button" href="" target="_blank" download="processed_video.mp4">Click here to download the processed video</a></p>

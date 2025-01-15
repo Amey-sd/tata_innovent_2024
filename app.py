@@ -23,6 +23,7 @@ UPLOAD_FOLDER = 'static/uploads'
 PROCESSED_FOLDER = 'static/processed'
 IMG_FOLDER = 'static/images'
 DOC_FOLDER = 'doc'
+LOG_FILE = os.path.join(DOC_FOLDER, 'defect_log.csv')
 csv = os.path.join(DOC_FOLDER, 'data.csv')
 template = os.path.join(DOC_FOLDER, 'template.docx')
 output = os.path.join(DOC_FOLDER, 'Report.docx')
@@ -34,14 +35,6 @@ os.makedirs(IMG_FOLDER, exist_ok=True)
 @app.route('/about')
 def about():
     return render_template('about.html')
-
-@app.route('/features')
-def features():
-    return render_template('features.html')
-
-@app.route('/documentation')
-def documentation():
-    return render_template('documentation.html')
 
 @app.route('/')
 def home():
@@ -58,6 +51,14 @@ def video():
 @app.route('/live')
 def live():
     return render_template('live.html')
+
+@app.route('/documentation')
+def documentation():
+    return render_template('documentation.html')
+
+@app.route('/features')
+def features():
+    return render_template('features.html')
 
 @app.route('/process', methods=['POST'])
 def process_file():
@@ -206,19 +207,40 @@ def process_video():
     processed_video_path = os.path.join(PROCESSED_FOLDER, processed_video_name)
     out = cv2.VideoWriter(processed_video_path, fourcc, fps, (width, height))
     
-    # Process each frame
-    for _ in range(frame_count):
-        ret, frame = cap.read()
-        if not ret:
-            break
+    # Open log file for writing defects
+    with open(LOG_FILE, 'w') as log_file:
+        log_file.write("Frame Number, Defect Type, Bounding Box\n")  # Header for log file
 
-        # Run model prediction
-        results = model.predict(frame, conf=0.2)
-        frame_with_boxes = results[0].plot()  # Annotated frame as numpy array
-        frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_RGB2BGR)  # Convert if needed
+        # Frame processing loop
+        for frame_number in range(frame_count):
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-        frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_BGR2RGB)
-        out.write(frame_with_boxes)
+            # Run model prediction
+            results = model.predict(frame, conf=0.2)
+
+            # Extract class IDs and names from results
+            class_ids = results[0].boxes.cls.cpu().numpy().tolist()
+            class_ids = [int(cls_id) for cls_id in class_ids]
+            class_names = [model.names[int(cls_id)] for cls_id in class_ids]
+
+            frame_with_boxes = results[0].plot()  # Annotated frame as numpy array
+            
+            # Check if any boxes were detected
+            if len(results[0].boxes.xyxy) > 0:
+                for box_idx in range(len(results[0].boxes.xyxy)):
+                    box = results[0].boxes.xyxy[box_idx]  # Get each bounding box
+                    x1, y1, x2, y2 = map(int, box[:4])  # Extract bounding box coordinates
+                    
+                    # Write to log file for each detected defect
+                    defect_type = class_names[box_idx]  # Get corresponding defect type
+                    log_file.write(f"{frame_number}, {defect_type}, ({x1}, {y1}), ({x2}, {y2})\n")
+
+            frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_RGB2BGR)
+            frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_BGR2RGB)  # Convert if needed
+            
+            out.write(frame_with_boxes)
 
     # Release resources
     cap.release()
@@ -236,7 +258,8 @@ def process_video():
     # Return success response
     return jsonify({
         'message': 'Video processed and re-encoded successfully',
-        'processed_video_url': f'/static/processed/{reencoded_video_name}'
+        'processed_video_url': f'/static/processed/{reencoded_video_name}',
+        'defect_log_url': f'/{LOG_FILE}'
     }), 200
 
 @app.route('/process_frame', methods=['POST'])
@@ -303,6 +326,8 @@ def processed_file(filename):
 @app.route('/doc/<filename>')
 def processed_doc(filename):
     if filename == 'Report.docx':
+        return send_from_directory(DOC_FOLDER, filename)
+    elif filename == 'defect_log.csv':
         return send_from_directory(DOC_FOLDER, filename)
 
 if __name__ == '__main__':

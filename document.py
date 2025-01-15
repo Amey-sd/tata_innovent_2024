@@ -138,11 +138,3 @@ def prepare_report_data(csv_path, template_path, output_path):
 
     # Call the function to generate the report
     generate_dynamic_damage_report(template_path, output_path, df)
-
-
-if __name__ == '__main__':
-    csv_path = r'E:/Random Python Scripts/Report Generation/src/data.csv'
-    template_path = r'E:/Random Python Scripts/Report Generation/src/template3.docx'
-    output_path = r'E:/Random Python Scripts/Report Generation/src/Report.docx'
-
-    prepare_report_data(csv_path, template_path, output_path)

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DefectVision</title>
+    <link rel="icon" href="static/images/logo.jpg" type="image/x-icon">
     <link rel="stylesheet" href="static/styles.css">
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -29,10 +30,15 @@
 </head>
 <body>
     <header>
-        <div class="logo">
+        <div class="logo" style="display: flex; align-items: center;">
+            <img src="static/images/logo.jpg" alt="DefectVision Logo" style="width: 50px; height: auto; margin-right: 10px;">
             <h2>DefectVision</h2>
         </div>
-        <nav>
+        
+        <input type="checkbox" id="menu-toggle" class="menu-toggle">
+        <label for="menu-toggle" class="hamburger">&#9776;</label>
+    
+        <nav class="nav-links">
             <a href="/">Home</a>
             <a href="/features">Features</a>
             <a href="/documentation">Documentation</a>
@@ -44,49 +50,47 @@
                     <a href="/live">Live</a>
                 </div>
             </div>
+            <a href="/about">About</a>
         </nav>
+    
         <div>
-            <a href="/about" style="margin-right: 10px;">About</a>
+            <img src="{{ url_for('static', filename='images/innovent.png') }}" alt="Feedback Section Image" style="width: 100%; border-radius: 10px; margin-right: 10px;">
         </div>
     </header>
 
-    <section class="hero" style="background-image: url('static/images/test.png'); background-repeat: no-repeat; background-size: cover; height: 100vh; display: flex; align-items: center; justify-content: center; color: white;">
-        <div class="hero-text">
-            <h1>Designed <em>to Detect</em></h1>
+    <section class="hero" style="background-image: url('static/images/test.png'); background-repeat: no-repeat; background-size: cover; height: 100vh; display: flex; align-items: center; justify-content: center; color: white; position: relative;">
+        <div class="overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 1;"></div>
+        <div class="hero-text" style="position: relative; z-index: 2; text-align: center;">
+            <h1 style="font-size: 4rem;">Designed <em>to Detect</em></h1>
+            <p>Text</p>
+            <a href="https://github.com/KaustubhGhale/Tata_Innovent_2024" target="_blank" style="text-decoration: none; color: #FFD700; font-weight: bold; font-size: 1.2rem;">Visit GitHub</a>
+            <div class="hero-image">
+                <div class="try-demo">
+                    <a href="/image">
+                        <button>Try Demo</button>
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
+    
 
-    <section>
-        <div class="before-after">
-            <span>Before</span>
-            <span>After</span>
-        </div>
-        <div class="hero-image">
-            <div class="try-demo">
-                <a href="/image">
-                    <button>Try Demo</button>
-                </a>
+    <section style="background-color: #333333; width: 100%; padding: 20px; box-sizing: border-box;">
+        <div style="display: flex; justify-content: space-between; max-width: 1200px; margin: 0 auto; padding: 20px;">
+            <div class="feedback-form" style="width: 60%; display: flex; flex-direction: column; gap: 20px;">
+                <input type="text" placeholder="First Name*" required style="width: 100%; padding: 10px; box-sizing: border-box;">
+                <input type="text" placeholder="Last Name*" required style="width: 100%; padding: 10px; box-sizing: border-box;">
+                <input type="text" placeholder="Email*" required style="width: 100%; padding: 10px; box-sizing: border-box;">
+                <input type="text" placeholder="Phone Number*" required style="width: 100%; padding: 10px; box-sizing: border-box;">
+                <textarea placeholder="Your Feedback*" rows="5" required style="width: 100%; padding: 10px; box-sizing: border-box;"></textarea>
+                <button type="submit" style="width: 100%; padding: 10px; box-sizing: border-box;">Submit Feedback</button>
             </div>
-            <img src="{{ url_for('static', filename='images/pic.png') }}" alt="Placeholder for product">
-        </div>
-    </section>
-    <section style="background-color: #333333;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; max-width: 1200px; margin: 0 auto; padding: 20px;">
-            <div class="feedback-form">
-                <input type="text" placeholder="First Name*" required>
-                <input type="text" placeholder="Last Name*" required>
-                <input type="text" placeholder="Email*" required>
-                <input type="text" placeholder="Phone Number*" required>
-                <textarea placeholder="Your Feedback*" rows="5" required></textarea>
-                <button type="submit">Submit Feedback</button>
-            </div>
-            
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                <img src="{{ url_for('static', filename='images/innovent.png') }}" alt="Feedback Section Image" style="width: 100%; border-radius: 10px;">
-                <a href="https://github.com/KaustubhGhale/Tata_Innovent_2024" target="_blank" style="text-decoration: none; color: #FFD700; font-weight: bold; font-size: 1.2rem;">Visit GitHub</a>
+            <div style="display: flex; flex-direction: column; justify-content: center; color: white;">
+                <h1 style="margin-bottom: 15px;">DefectVision</h1>
+                <h4 style="margin-bottom: 15px;">By Team HaxS</h4>
             </div>
         </div>
-    </section>
+    
     
 
 </body>
