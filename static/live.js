@@ -36,6 +36,8 @@ stopLiveButton.addEventListener('click', () => {
     if (intervalId) clearInterval(intervalId);
     processedVideoFeed.style.display = 'none';
     processedVideoFeed.src = '';
+    var resultsDiv = document.getElementById('results');
+    resultsDiv.style.display = 'block'; // Show the results div
 });
 
 async function sendFrame(model) {
