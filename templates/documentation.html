@@ -37,354 +37,46 @@
         </div>
     </header>
     <main class="main">
-        <h2 id="project-overview"><strong>Project Overview</strong></h2>
-        <p>This project presents an AI-driven solution for automated defect detection, significantly enhancing the efficiency of domain experts by reducing analysis time from weeks or months to mere minutes. The system supports live defect detection and video processing, leveraging several state-of-the-art models in computer vision, including YOLOv8, YOLOv11, Detectron2, SAM, Pali-Gemma, and Grounding DINO.</p>
-        <h2 id="table-of-contents"><strong>Table of Contents</strong></h2>
-        <ul>
-        <li><a href="#project-overview"><strong>Project Overview</strong></a></li>
-        <li><a href="#table-of-contents"><strong>Table of Contents</strong></a></li>
-        <li><a href="#dataset-collection-and-scraping"><strong>Dataset Collection and Scraping</strong></a><ul>
-        <li><a href="#steps-taken"><strong>Steps Taken</strong></a></li>
-        </ul>
-        </li>
-        <li><a href="#data-augmentation-and-preprocessing"><strong>Data Augmentation and Preprocessing</strong></a></li>
-        <li><a href="#models-used"><strong>Models Used</strong></a><ul>
-        <li><a href="#yolov8"><strong>Yolov8</strong></a></li>
-        <li><a href="#yolov11"><strong>YOLOv11</strong></a></li>
-        <li><a href="#detectron2"><strong>Detectron2</strong></a></li>
-        <li><a href="#sam-segment-anything-model"><strong>SAM (Segment Anything Model)</strong></a></li>
-        <li><a href="#pali-gemma"><strong>Pali-Gemma</strong></a></li>
-        <li><a href="#grounding-dino"><strong>Grounding DINO</strong></a></li>
-        </ul>
-        </li>
-        <li><a href="#impact-and-results"><strong>Impact and Results</strong></a></li>
-        <li><a href="#tech-stack"><strong>Tech Stack</strong></a></li>
-        </ul>
-        <h2 id="dataset-collection-and-scraping"><strong>Dataset Collection and Scraping</strong></h2>
-        <p>To build a comprehensive dataset for training our models, we faced challenges in finding existing datasets that met our specific needs for defect detection tasks. Therefore, we implemented a data collection strategy that involved scraping images from various online sources.</p>
-        <h3 id="steps-taken"><strong>Steps Taken:</strong></h3>
-        <ol>
-        <li><p><strong>Identifying Sources</strong>: We identified relevant websites, forums, and repositories that contained images of defects across various domains.</p>
-        </li>
-        <li><p><strong>Web Scraping</strong>: Using Python libraries such as BeautifulSoup and Scrapy, we developed scripts to automate the scraping process:</p>
-        <ul>
-        <li>Extracted image URLs from HTML content.</li>
-        <li>Downloaded images while ensuring compliance with copyright regulations.</li>
-        </ul>
-        </li>
-        <li><p><strong>Data Validation</strong>: Post-scraping, we validated the dataset by filtering out low-quality images and ensuring that each image was relevant to defect detection.</p>
-        </li>
-        <li><p><strong>Annotation</strong>: We utilized tools like LabelImg to manually annotate the defects in the images, creating bounding boxes and labels for supervised learning.</p>
-        </li>
-        </ol>
-        <p>This approach allowed us to compile a diverse dataset that includes various types of defects necessary for training robust models.</p>
-        <h2 id="data-augmentation-and-preprocessing"><strong>Data Augmentation and Preprocessing</strong></h2>
-        <p>To enhance the dataset&#39;s robustness and improve model performance, we applied several data augmentation techniques:</p>
-        <ul>
-        <li><p><strong>Augmentations</strong>:</p>
-        <ul>
-        <li>Grayscale: Applied to approximately <strong>15%</strong> of images.</li>
-        <li>Hue Adjustment: Between <strong>-15°</strong> and <strong>+15°</strong>.</li>
-        <li>Saturation Adjustment: Between <strong>-25%</strong> and <strong>+25%</strong>.</li>
-        <li>Brightness Adjustment: Between <strong>-15%</strong> and <strong>+15%</strong>.</li>
-        <li>Exposure Adjustment: Between <strong>-10%</strong> and <strong>+10%</strong>.</li>
-        <li>Blur: Up to <strong>2.5px</strong>.</li>
-        <li>Noise: Up to <strong>1.45%</strong> of pixels.</li>
-        </ul>
-        </li>
-        <li><p><strong>Preprocessing Steps</strong>:</p>
-        <ul>
-        <li>Auto-Orientation: Applied to ensure images are correctly oriented.</li>
-        <li>Resize: All images were stretched to a uniform size of <strong>1240x1240 pixels</strong>.</li>
-        </ul>
-        </li>
-        </ul>
-        <p>The dataset consists of:</p>
-        <ul>
-        <li><strong>Training Set</strong>: <strong>3475 images</strong></li>
-        <li><strong>Validation Set</strong>: <strong>324 images</strong></li>
-        <li><strong>Test Set</strong>: <strong>201 images</strong></li>
-        </ul>
-        <h2 id="models-used"><strong>Models Used</strong></h2>
-        <h3 id="yolov8"><strong>Yolov8</strong></h3>
-        <p>YOLOv8 (You Only Look Once), developed by Ultralytics, is a cutting-edge model designed to enhance real-time object detection capabilities. Building upon the successes of its predecessors, YOLOv8 incorporates advanced features that significantly improve performance across various tasks. Utilizing state-of-the-art architectures, such as a CSPNet backbone and an FPN+PAN neck, YOLOv8 effectively captures both low-level and high-level features from input images. This optimization makes it particularly well-suited for applications requiring immediate feedback and decision-making, including autonomous vehicles, surveillance systems, and robotics.</p>
-        <p>In our work with YOLOv8, The following table summarizes the key specifications and results for different YOLOv8 models:</p>
-        <table>
-        <thead>
-        <tr>
-        <th>Model</th>
-        <th>Batch Size</th>
-        <th>Epochs</th>
-        <th>Size</th>
-        <th>mAP^val</th>
-        <th>Speed (ms)</th>
-        <th>Params (M)</th>
-        <th>FLOPs (G)</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-        <td>Mini</td>
-        <td>16</td>
-        <td>200</td>
-        <td>640</td>
-        <td>37.3</td>
-        <td>80.4</td>
-        <td>3.2</td>
-        <td>8.7</td>
-        </tr>
-        <tr>
-        <td>Medium</td>
-        <td>32</td>
-        <td>200</td>
-        <td>640</td>
-        <td>44.9</td>
-        <td>128.4</td>
-        <td>11.2</td>
-        <td>28.6</td>
-        </tr>
-        <tr>
-        <td>Large</td>
-        <td>64</td>
-        <td>200</td>
-        <td>640</td>
-        <td>50.2</td>
-        <td>234.7</td>
-        <td>25.9</td>
-        <td>78.9</td>
-        </tr>
-        <tr>
-        <td>Large_XL</td>
-        <td>128</td>
-        <td>1000</td>
-        <td>640</td>
-        <td>52.9</td>
-        <td>375.2</td>
-        <td>43.7</td>
-        <td>165.2</td>
-        </tr>
-        </tbody>
-        </table>
-        <p>The results indicate that as the model size increases from Mini to Large_XL, there is a corresponding improvement in mAP^val, reflecting enhanced detection capabilities at the cost of increased computational requirements and inference time.</p>
-        <h3 id="yolov11"><strong>YOLOv11</strong></h3>
-        <p>YOLOv11 represents an upgraded version of the YOLO (You Only Look Once) series, designed to enhance object detection performance across various applications. This iteration introduces significant improvements in accuracy and efficiency, making it a compelling choice for real-time detection tasks. With advancements in model architecture and feature extraction capabilities, YOLOv11 is well-suited for diverse environments, including edge devices and cloud platforms.</p>
-        <p>For YOLOv11, The following table summarizes the key specifications and results for the Mini and Medium variants of YOLOv11:</p>
-        <table>
-        <thead>
-        <tr>
-        <th>Model</th>
-        <th>Batch Size</th>
-        <th>Epochs</th>
-        <th>Size</th>
-        <th>mAP^val</th>
-        <th>Speed (ms)</th>
-        <th>Params (M)</th>
-        <th>FLOPs (G)</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-        <td>Mini</td>
-        <td>16</td>
-        <td>200</td>
-        <td>640</td>
-        <td>39.5</td>
-        <td>56.1 ± 0.8</td>
-        <td>2.6</td>
-        <td>6.5</td>
-        </tr>
-        <tr>
-        <td>Medium</td>
-        <td>32</td>
-        <td>200</td>
-        <td>640</td>
-        <td>47.0</td>
-        <td>90.0 ± 1.2</td>
-        <td>9.4</td>
-        <td>21.5</td>
-        </tr>
-        </tbody>
-        </table>
-        <p>The results indicate that the Mini variant offers a balance between speed and accuracy, achieving a respectable mAP^val of 39.5 while maintaining a fast inference speed of approximately 56.1 ms. In contrast, the Medium variant demonstrates improved detection capabilities with a higher mAP^val of 47.0, albeit at a slightly slower speed of around 90.0 ms.</p>
-        <h3 id="detectron2"><strong>Detectron2</strong></h3>
-        <p>Detectron2 is a powerful, modular object detection and segmentation framework developed by Meta&#39;s Facebook AI Research (FAIR). Built on PyTorch, it is designed to support a wide range of computer vision tasks, including object detection, instance segmentation, semantic segmentation, and panoptic segmentation. The architecture of Detectron2 allows users to easily customize and experiment with various components, such as model architectures, loss functions, and training techniques. It achieves state-of-the-art performance on benchmarks like the COCO dataset and LVIS (Large Vocabulary Instance Segmentation), making it a preferred choice for researchers and developers in the field.</p>
-        <p>For Detectron2, The following table summarizes the specifications and results for three prominent models within the framework:</p>
-        <table>
-        <thead>
-        <tr>
-        <th>Model</th>
-        <th>Batch Size</th>
-        <th>Epochs</th>
-        <th>Size</th>
-        <th>mAP^val</th>
-        <th>Speed (ms)</th>
-        <th>Params (M)</th>
-        <th>FLOPs (G)</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-        <td>Mask R-CNN R50-FPN</td>
-        <td>32</td>
-        <td>200</td>
-        <td>5000px x 5000px</td>
-        <td>37.8</td>
-        <td>16.1</td>
-        <td>44.5</td>
-        <td>180</td>
-        </tr>
-        <tr>
-        <td>Faster R-CNN R50-FPN</td>
-        <td>64</td>
-        <td>200</td>
-        <td>5000px x 5000px</td>
-        <td>36.2</td>
-        <td>10.7</td>
-        <td>41.5</td>
-        <td>200</td>
-        </tr>
-        <tr>
-        <td>RetinaNet R50</td>
-        <td>128</td>
-        <td>200</td>
-        <td>5000px x 5000px</td>
-        <td>36.8</td>
-        <td>9.2</td>
-        <td>36.2</td>
-        <td>180</td>
-        </tr>
-        </tbody>
-        </table>
-        <p>The results indicate that the Mask R-CNN R50-FPN model achieved a mAP^val of 37.8 with a speed of approximately 16.1 ms, showcasing its effectiveness in detecting objects while maintaining reasonable computational demands. The Faster R-CNN R50-FPN model provided slightly lower accuracy at a mAP^val of 36.2 but demonstrated faster processing times at around 10.7 ms, making it suitable for applications prioritizing speed over precision. Meanwhile, RetinaNet R50 achieved a competitive mAP^val of 36.8 but required more time for inference at about 9.2 ms.</p>
-        <h3 id="sam-segment-anything-model"><strong>SAM (Segment Anything Model)</strong></h3>
-        <p>The Segment Anything Model (SAM) is a state-of-the-art framework designed specifically for segmentation tasks in computer vision. Developed to enhance the accuracy and efficiency of segmentation processes, SAM leverages advanced techniques to deliver high-quality results across various applications. Its architecture allows for flexible and scalable implementations, making it suitable for both research and practical applications in fields such as medical imaging, autonomous driving, and video analysis.</p>
-        <p>SAM plays a crucial role in accurately segmenting objects within images. The following table summarizes the specifications and results for these configurations:</p>
-        <table>
-        <thead>
-        <tr>
-        <th>Model</th>
-        <th>Batch Size</th>
-        <th>Epochs</th>
-        <th>Size (MB)</th>
-        <th>mAP^val</th>
-        <th>Speed (ms)</th>
-        <th>Params (M)</th>
-        <th>FLOPs (G)</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-        <td>Mini</td>
-        <td>16</td>
-        <td>200</td>
-        <td>358</td>
-        <td>35.0</td>
-        <td>51096</td>
-        <td>94.7</td>
-        <td>12.4</td>
-        </tr>
-        <tr>
-        <td>Medium</td>
-        <td>32</td>
-        <td>200</td>
-        <td>358</td>
-        <td>42.5</td>
-        <td>51096</td>
-        <td>94.7</td>
-        <td>35.6</td>
-        </tr>
-        </tbody>
-        </table>
-        <p>The results indicate that the Mini configuration achieved a mAP^val of 35.0 with an inference speed of approximately 51096 ms, making it suitable for applications where quick processing is necessary but with slightly lower accuracy. In contrast, the Medium configuration demonstrated improved segmentation performance with a mAP^val of 42.5 while maintaining a competitive inference speed of around 51096 ms.</p>
-        <h3 id="pali-gemma"><strong>Pali-Gemma</strong></h3>
-        <p>Pali-Gemma is a cutting-edge vision-language model (VLM) developed by Google, designed to excel in various multimodal tasks, including defect detection. Released in May 2024, Pali-Gemma integrates visual and textual data, enabling it to perform complex analyses such as object detection, segmentation, and visual question answering. Its architecture combines a powerful visual encoder, SigLIP, with a compact text decoder, Gemma, allowing the model to understand and generate coherent outputs based on both image and text inputs.</p>
-        <p>The following table summarizes the specifications and results for this configuration:</p>
-        <table>
-        <thead>
-        <tr>
-        <th>Model</th>
-        <th>Batch Size</th>
-        <th>Epochs</th>
-        <th>Size (mb)</th>
-        <th>mAP^val</th>
-        <th>Speed (ms)</th>
-        <th>Params (M)</th>
-        <th>FLOPs (G)</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-        <td>Default</td>
-        <td>64</td>
-        <td>200</td>
-        <td>12.5</td>
-        <td>45.3</td>
-        <td>23.5</td>
-        <td>3000</td>
-        <td>6.5</td>
-        </tr>
-        </tbody>
-        </table>
-        <p>The results indicate that the Default configuration achieved a mAP^val of 45.3, demonstrating strong performance in accurately detecting defects while maintaining an inference speed of approximately 23.5 ms. With 3 Billion parameters and a computational requirement of 6.5 FLOPs, Pali-Gemma balances efficiency with high-quality output.</p>
-        <h3 id="grounding-dino"><strong>Grounding DINO</strong></h3>
-        <p>Grounding DINO is a state-of-the-art open-set object detection framework that combines the principles of self-supervised learning with grounded pre-training techniques. This innovative model allows for the detection and annotation of objects in images based on textual prompts, making it particularly effective for applications that require flexible and context-aware detection capabilities. By integrating visual and textual inputs, Grounding DINO excels in identifying arbitrary objects, even those not explicitly seen during training.</p>
-        <p>We attempted to pair Grounding DINO with the Segment Anything Model (SAM) to enhance defect detection capabilities specifically related to cars. However, despite our efforts, we were unable to achieve satisfactory results in detecting car-related defects.</p>
-        <p>For Grounding DINO, The following table summarizes the key specifications and results for the Default model:</p>
-        <table>
-        <thead>
-        <tr>
-        <th>Model</th>
-        <th>Batch Size</th>
-        <th>Epochs</th>
-        <th>Size (mb)</th>
-        <th>mAP^val</th>
-        <th>Speed (ms)</th>
-        <th>Params (M)</th>
-        <th>FLOPs (B)</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-        <td>Grounding DINO Pro</td>
-        <td>64</td>
-        <td>200</td>
-        <td>12.8</td>
-        <td>52.5</td>
-        <td>131.0</td>
-        <td>174</td>
-        <td>15.8</td>
-        </tr>
-        <tr>
-        <td>Grounding DINO Edge</td>
-        <td>64</td>
-        <td>200</td>
-        <td>12.8</td>
-        <td>48.0</td>
-        <td>98.0</td>
-        <td>341</td>
-        <td>15.8</td>
-        </tr>
-        </tbody>
-        </table>
-        <p>The results indicate that the Grounding DINO Pro model achieved a mean Average Precision of 52.5, showcasing its superior capability in detecting objects accurately while maintaining an inference speed of approximately 100.0 ms. In contrast, the Grounding DINO Edge model demonstrated a slightly lower mAP^val of 48.0 but excelled in speed with an inference time of around 98.0 ms, making it ideal for edge computing scenarios where efficiency is paramount.</p>
-        <h2 id="impact-and-results"><strong>Impact and Results</strong></h2>
-        <p>The implementation of this AI-driven solution has revolutionized the defect detection process in our domain:</p>
-        <ul>
-        <li>Automated defect analysis has significantly reduced time and effort compared to manual methods.</li>
-        <li>The system supports live defect detection capabilities, allowing real-time monitoring.</li>
-        <li>Video processing support enables continuous analysis in dynamic environments.</li>
-        </ul>
-        <p>By leveraging advanced AI architectures, we have achieved substantial improvements in operational efficiency for domain experts.</p>
-        <h2 id="tech-stack"><strong>Tech Stack</strong></h2>
-        <p>The following technologies were utilized throughout the project:</p>
-        <ul>
-        <li><strong>AI Architectures</strong>: YOLOv8, YOLOv11, Detectron2, SAM, Pali-Gemma, Grounding DINO</li>
-        <li><strong>Programming Languages</strong>: Python, JavaScript, HTML, CSS</li>
-        <li><strong>Frameworks and Libraries</strong>: TensorFlow, PyTorch, OpenCV</li>
-        <li><strong>Version Control</strong>: Git, GitHub</li>
-        <li><strong>Cloud Services</strong>: Azure Cloud</li>
-        <li><strong>Web Frameworks</strong>: Flask</li>
-        </ul>
-    </main>
+    <h1>The AI Solution for Defect Detection in Manufacturing</h1>
+
+    <p>The implementation of AI-driven solutions in manufacturing has revolutionized defect detection processes, providing significant improvements in efficiency and accuracy. This detailed overview explores the various components of such a solution, focusing on image analysis, automated insights, report generation, the technology stack used, and the overall impact on operational efficiency.</p>
+
+    <h2 id="image-analysis">1. Image Analysis</h2>
+
+    <p>At the core of this AI solution is advanced <strong>image analysis</strong>, which meticulously inspects critical components such as bearings and gears. The system utilizes cutting-edge algorithms to capture high-resolution images of each component, allowing for the identification of even the minutest defects that human inspectors might overlook. This meticulous approach ensures that every part is thoroughly examined, enhancing the overall quality control process.</p>
+
+    <h2 id="automated-insights">2. Automated Insights</h2>
+
+    <p>The integration of powerful AI models like <strong>YOLO (You Only Look Once)</strong> facilitates real-time object detection and defect analysis. These models process the captured images rapidly, generating automated insights regarding the quality and integrity of each component. The AI system is capable of distinguishing between various types of defects and assessing their severity. This capability ensures that only components meeting stringent quality standards are allowed to proceed further along the production line, thereby minimizing the risk of defects reaching the end customer.</p>
+
+    <h2 id="report-generation">3. Report Generation</h2>
+
+    <p>To enhance decision-making processes, a comprehensive report generation feature presents insights through a user-friendly interface. Quality control teams can monitor inspection results in real-time, review detailed reports, and track historical data for trend analysis. This centralized dashboard simplifies data interpretation and enables quick responses to any identified quality issues, fostering a proactive approach to quality management.</p>
+
+    <h2 id="tech-stack">4. Tech Stack</h2>
+
+    <p>The project employs a robust technology stack that includes:</p>
+    <ul>
+        <li><strong>AI Architectures:</strong> YOLOv8, YOLOv11, Detectron2, SAM (Segment Anything Model), Pali-Gemma, Grounding DINO</li>
+        <li><strong>Programming Languages:</strong> Python, JavaScript (for web interfaces), HTML, CSS</li>
+        <li><strong>Frameworks and Libraries:</strong> TensorFlow and PyTorch for deep learning applications</li>
+        <li><strong>Version Control:</strong> Git and GitHub for collaborative development</li>
+        <li><strong>Cloud Services:</strong> Azure Cloud for scalable computing resources</li>
+        <li><strong>Web Frameworks:</strong> Flask for creating web applications</li>
+    </ul>
+
+    <p>This diverse tech stack allows for flexibility and adaptability in developing sophisticated AI solutions tailored to specific manufacturing needs.</p>
+
+    <h2 id="impact-results">5. Impact and Results</h2>
+
+    <p>The implementation of this AI-driven defect detection solution has led to transformative changes in manufacturing operations:</p>
+    <ul>
+        <li><strong>Automation:</strong> The automation of defect analysis significantly reduces the time and effort required compared to traditional manual inspection methods.</li>
+        <li><strong>Live Monitoring:</strong> The system supports live defect detection, enabling real-time monitoring of production processes and immediate identification of quality issues.</li>
+        <li><strong>Dynamic Analysis:</strong> With video processing capabilities, the solution facilitates continuous analysis in dynamic environments where products are constantly moving.</li>
+    </ul>
+
+    <p>Overall, by leveraging advanced AI architectures and machine learning techniques, this project has achieved remarkable improvements in operational efficiency. The reduction in analysis time—from weeks or months to mere minutes—will garner high customer satisfaction ratings during its initial phases.</p>
+</main>
 </body>
 </html>
