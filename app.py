@@ -193,7 +193,7 @@ def process_video():
 
     # Open log file for writing defects
     with open(LOG_FILE, 'w') as log_file:
-        log_file.write("Frame Number, Defect Type, Bounding Box\n")  # Header for log file
+        log_file.write("Frame Number, Defect Type, Mask Area\n")  # Header for log file
 
         # Frame processing loop
         for frame_number in range(frame_count):
@@ -209,22 +209,22 @@ def process_video():
             class_ids = [int(cls_id) for cls_id in class_ids]
             class_names = [model.names[int(cls_id)] for cls_id in class_ids]
 
-            frame_with_boxes = results[0].plot()  # Annotated frame as numpy array
-            
-            # Check if any boxes were detected
-            if len(results[0].boxes.xyxy) > 0:
-                for box_idx in range(len(results[0].boxes.xyxy)):
-                    box = results[0].boxes.xyxy[box_idx]  # Get each bounding box
-                    x1, y1, x2, y2 = map(int, box[:4])  # Extract bounding box coordinates
-                    
-                    # Write to log file for each detected defect
-                    defect_type = class_names[box_idx]  # Get corresponding defect type
-                    log_file.write(f"{frame_number}, {defect_type}, ({x1}, {y1}), ({x2}, {y2})\n")
+            masks = results[0].masks.data  # Access the raw mask data
+            mask_areas = []
 
-            frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_RGB2BGR)
-            frame_with_boxes = cv2.cvtColor(frame_with_boxes, cv2.COLOR_BGR2RGB)  # Convert if needed
-            
-            out.write(frame_with_boxes)
+            if masks is not None:
+                for mask in masks:
+                    # Convert each mask to binary format and calculate area
+                    binary_mask = mask.cpu().numpy()  # Get the numpy array representation of the mask
+                    area = cv2.countNonZero(binary_mask)  # Count non-zero pixels in the mask
+                    mask_areas.append(area)
+
+                    # Write to log file for each detected defect (assuming one area per defect)
+                    defect_type = class_names[len(mask_areas) - 1]  # Get corresponding defect type
+                    log_file.write(f"{frame_number}, {defect_type}, {area}\n")
+
+            frame_with_masks = results[0].plot()  # Annotated frame as numpy array
+            out.write(frame_with_masks)
 
     # Release resources
     cap.release()
@@ -237,8 +237,6 @@ def process_video():
         'defect_log_url': f'/{LOG_FILE}'  # Provide a URL to access the log file if needed
     }), 200
 
-
-
 def generate_frames(model):
     # Try initializing the camera
     camera = cv2.VideoCapture(0)
@@ -250,7 +248,7 @@ def generate_frames(model):
 
     # Open log file for writing defects
     with open(LOG_FILE, 'w') as log_file:
-        log_file.write("Frame Number, Defect Type, Bounding Box\n")  # Header for log file
+        log_file.write("Frame Number, Defect Type, Mask Area\n")  # Header for log file
         
         frame_number = 0  # Initialize frame counter
 
@@ -273,15 +271,26 @@ def generate_frames(model):
             class_ids = [int(cls_id) for cls_id in class_ids]
             class_names = [model.names[int(cls_id)] for cls_id in class_ids]
 
-            # Log defects for each detected object
-            for box_idx in range(len(result.boxes.xyxy)):
-                box = result.boxes.xyxy[box_idx]  # Get each bounding box
-                x1, y1, x2, y2 = map(int, box[:4])  # Extract bounding box coordinates
+            mask_areas = []
+
+            # Check if masks are available
+            if result.masks is not None:
+                masks = result.masks.data  # Access the raw mask data
                 
-                defect_type = class_names[box_idx]  # Get corresponding defect type
-                
-                # Write to log file for each detected defect
-                log_file.write(f"{frame_number}, {defect_type}, ({x1}, {y1}), ({x2}, {y2})\n")
+                for mask in masks:
+                    # Convert each mask to binary format and calculate area
+                    binary_mask = mask.cpu().numpy()  # Get the numpy array representation of the mask
+                    area = cv2.countNonZero(binary_mask)  # Count non-zero pixels in the mask
+                    mask_areas.append(area)
+
+                    # Log defects for each detected object (assuming one area per defect)
+                    defect_type = class_names[len(mask_areas) - 1]  # Get corresponding defect type
+                    
+                    # Write to log file for each detected defect
+                    log_file.write(f"{frame_number}, {defect_type}, {area}\n")
+
+            else:
+                print(f"No masks found for frame {frame_number}.")  # Optional logging for debugging
 
             # Plot the predictions on the frame
             annotated_frame = result.plot()
@@ -310,6 +319,7 @@ def video_feed():
 
     return Response(generate_frames(model),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 @app.route('/static/uploads/<filename>')
 def uploaded_file(filename):
