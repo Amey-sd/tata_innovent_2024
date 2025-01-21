@@ -78,6 +78,8 @@ def process_file():
     if img is None:
         return jsonify({'error': 'Invalid image file'}), 400
 
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
     # YOLO Prediction
     results = model.predict(img, conf=0.2)
     img_with_boxes = results[0].plot()  # Matplotlib array
@@ -109,14 +111,16 @@ def process_file():
             plt.axis('off')
             plt.title("Original Image")
             plt.show()
-        elif r.boxes is not None:
+        else:
+            print("No Image found")
+        if r.boxes is not None:
             # Convert results to list for further analysis
             class_ids = r.boxes.cls.cpu().numpy().tolist()            
             class_ids = [int(cls_id) for cls_id in class_ids]
             class_names = [model.names[int(cls_id)] for cls_id in class_ids]
 
             # Calculate mask areas
-            masks = r.masks.data  # Access the raw mask data
+            masks = r.masks.data if r.masks is not None else None  # Access the raw mask data
             mask_areas = []
 
             if masks is not None:
@@ -209,7 +213,7 @@ def process_video():
             class_ids = [int(cls_id) for cls_id in class_ids]
             class_names = [model.names[int(cls_id)] for cls_id in class_ids]
 
-            masks = results[0].masks.data  # Access the raw mask data
+            masks = results[0].masks.data if results[0].masks is not None else None  # Access the raw mask data
             mask_areas = []
 
             if masks is not None:
